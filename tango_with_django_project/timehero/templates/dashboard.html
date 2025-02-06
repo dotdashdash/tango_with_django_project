@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TimeHero</title>
+    <link rel="stylesheet" href="{% static 'css/pixel.css' %}">
+</head>
+<body>
+
+<!-- 状态栏 -->
+<div class="status-bar">
+    <div class="status-item">
+        <img src="{% static 'sprites/hero.png' %}" class="pixel-icon">
+        <span>Lv.{{ user.level }}</span> | <span>{{ user.username }}</span>
+    </div>
+    <div class="status-item">
+        ❤️ <span id="hp">{{ user.hp }}</span>/5
+    </div>
+    <div class="status-item">
+        <img src="{% static 'sprites/coins.png' %}" class="pixel-icon">
+        <span id="exp">{{ user.exp }}</span> EXP
+    </div>
+    <!-- 🚀 Logout 按钮 -->
+    <div class="status-item logout">
+        <form action="{% url 'logout' %}?next={% url 'index' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="pixel-btn logout-btn">🚪 Logout</button>
+        </form>
+    </div>
+</div>
+
+<!-- 任务地图 -->
+<div class="pixel-map">
+    {% for task in tasks %}
+        <div class="map-tile {% if task.is_completed %}completed{% endif %}" 
+             data-task-id="{{ task.id }}"
+             data-position-x="{{ task.position_x }}"
+             data-position-y="{{ task.position_y }}">
+            {% if task.difficulty == 3 %}🔥{% else %}📜{% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+<!-- 任务面板 -->
+<div class="task-board">
+    <h2 class="pixel-title">📋 Task Board</h2>
+    <button class="pixel-btn" onclick="toggleTaskModal()">➕ New Task</button>
+    <div class="task-list">
+        {% for task in tasks %}
+        {% if task.user == request.user%}
+        <div class="task-card {% if task.is_completed %}completed{% endif %}" id="task-{{ task.id }}">
+            <div class="task-header">
+                <span class="difficulty-{{ task.difficulty }}">
+                    {{ task.get_difficulty_display }}
+                </span>
+                {% if not task.is_completed %}
+                <button class="pixel-btn complete-task-btn" data-task-id="{{ task.id }}">
+                    ✅ Complete
+                </button>
+                {% else %}
+                <span class="completed-text">✔️ Done</span>
+                {% endif %}
+            </div>
+            <p class="task-title">{{ task.title }}</p>
+
+            <!-- 任务详情部分，只有未完成的任务才显示 -->
+            <div class="task-details" {% if task.is_completed %}style="display: none;"{% endif %}>
+                {% if task.start_date %}
+                <p class="task-time">🕒 Start: {{ task.start_date|date:"Y/m/d H:i" }}</p>
+                {% endif %}
+                {% if task.due_date %}
+                <p class="task-due">⏳ Due: {{ task.due_date|date:"Y/m/d H:i" }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 任务创建模态框 -->
+<div id="taskModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close" onclick="toggleTaskModal()">&times;</span>
+        <h2>Create New Task</h2>
+        <form id="taskForm" method="POST" action="{% url 'task-list' %}">
+            {% csrf_token %}
+            
+            <label>Task Title:</label>
+            <input type="text" id="taskTitle" name="title" required oninput="predictDifficulty()">
+
+            <label>Start Time:</label>
+            <input type="datetime-local" id="taskStartDate" name="start_date">
+
+            <label>Due Date:</label>
+            <input type="datetime-local" id="taskDueDate" name="due_date" onchange="calculateDuration()">
+
+            <label for="taskPriority">High Priority:</label>
+            <input type="checkbox" id="taskPriority" name="priority" value="true">
+
+            <label>Difficulty:</label>
+            <span id="difficultyDisplay">Easy</span>
+            <input type="hidden" id="taskDifficulty" name="difficulty">
+
+            <button type="submit" class="pixel-btn">Submit</button>
+        </form>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script src="{% static 'js/script.js' %}"></script>
+
+</body>
+</html>

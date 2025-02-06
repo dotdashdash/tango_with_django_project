@@ -1,0 +1,19 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册</title>
+    <link rel="stylesheet" href="{% static 'css/pixel.css' %}">
+</head>
+<body>
+    <h2>用户注册</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">注册</button>
+    </form>
+    <a href="{% url 'login' %}">已有账号？登录</a>
+</body>
+</html>
