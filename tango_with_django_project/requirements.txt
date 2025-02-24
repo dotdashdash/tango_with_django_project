@@ -19,4 +19,4 @@ sqlparse
 # typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/typing_extensions_1733188668063/work
 typing_extensions
 tzdata==2024.2
-urllib3==2.3.0
+urllib3==2.2.3

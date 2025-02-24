@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-#$59r(df44se0)#zu=vsgo4w2^5y(p+tg#n7_17oekf9x%o=pq
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -134,3 +134,4 @@ REST_FRAMEWORK = {
 }
 LOGIN_REDIRECT_URL = '/dashboard/'  # 用户登录后直接跳转到dashboard
 LOGOUT_REDIRECT_URL = '/index/'  # 退出后回到首页
+ALLOWED_HOSTS = ['dotdashdash.pythonanywhere.com','127.0.0.1']
