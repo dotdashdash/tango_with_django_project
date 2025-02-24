@@ -6,7 +6,7 @@ charset-normalizer==3.4.1
 Django
 djangorestframework==3.15.2
 idna==3.10
-numpy==2.2.1
+numpy==1.24.4
 pandas==2.2.3
 # pillow @ file:///Users/runner/miniforge3/conda-bld/pillow_1735929746402/work
 pillow
