@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
-from .services import evaluate_difficulty,complete_task
+from .services import evaluate_difficulty, complete_task, to_next_level, cap_by_level, MAX_STAT_POINTS, MAX_HEALTH
 from .signals import *
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
@@ -74,9 +74,43 @@ class TaskViewSet(viewsets.ModelViewSet):
         if not task.is_completed:
             task.is_completed = True
             task.save()
-            user=task.user
-            user.exp += task.difficulty * 10
+
+            user = task.user
+            user.exp += task.difficulty * 1000
+
+            # 升级逻辑
+            experience_to_next_level = to_next_level(user.level)
+            leveled_up = False
+
+            while user.exp >= experience_to_next_level:
+                user.exp -= experience_to_next_level
+                user.level = cap_by_level(user.level + 1)
+                leveled_up = True
+
+                experience_to_next_level = to_next_level(user.level)
+                user.hp = MAX_HEALTH
+                #
+                # allocated_stat_points = user.strength + user.intelligence + user.constitution + user.perception
+                # total_stat_points = allocated_stat_points + user.stat_points
+                #
+                # if total_stat_points < MAX_STAT_POINTS:
+                #     if user.automatic_allocation:
+                #         auto_allocate(user)
+                #     else:
+                #         user.stat_points = user.level - allocated_stat_points
+                #         total_stat_points = user.stat_points + allocated_stat_points
+                #
+                #         if total_stat_points > MAX_STAT_POINTS:
+                #             user.stat_points = MAX_STAT_POINTS - allocated_stat_points
+                #
+                #         if user.stat_points < 0:
+                #             user.stat_points = 0
             user.save()
+
+            if leveled_up:
+                # 记录升级事件或发送通知
+                pass
+
         return Response({"status": "completed"})
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
