@@ -2,18 +2,241 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登录</title>
-    <link rel="stylesheet" href="{% static 'css/pixel.css' %}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 - TimeHero</title>
+  <!-- 引入 Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
+  <style>
+    .welcome-text {
+      font-family: 'Roboto', sans-serif;
+      text-align: center;
+    }
+  </style>
+  <style>
+    /* 基础重置 */
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+    }
+    /* 整体背景及容器：使用 flex 布局 */
+    .form-wrapper {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background: linear-gradient(to bottom, #4f2a93, #6133b4);
+      position: relative;
+      font-family: 'Varela Round', sans-serif;
+    }
+    /* 顶部背景：星空效果 */
+    #top-background .seamless_stars_varied_opacity_repeat {
+      background-image: url('{% static 'image/seamless_stars_varied_opacity.png' %}');
+      background-repeat: repeat-x;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 500px;
+      width: 100%;
+    }
+    /* 登录表单样式 */
+    #login-form {
+      margin: 0 auto;
+      width: 40em;
+      padding-top: 5em;
+      padding-bottom: 4em;
+      position: relative;
+      z-index: 1;
+      color: #fff;
+    }
+    #login-form label {
+      color: #fff;
+      font-weight: bold;
+    }
+    #login-form input {
+      margin-bottom: 2em;
+      border-radius: 2px;
+      background-color: #432874;
+      border: none;
+      height: 50px;
+      padding: 0 1em;
+      color: #fff;
+    }
+    /* 错误提示文本 */
+    #login-form .input-error {
+      color: #fff;
+      font-size: 90%;
+      margin-top: -1em;
+      margin-bottom: 1em;
+    }
+    /* 按钮样式 */
+    #login-form .btn {
+      width: 100%;
+      padding: 0.75em;
+      font-size: 18px;
+      border: none;
+      background-color: #8e24aa;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #login-form .btn:hover {
+      background-color: #f3e5f5;
+      color: #8e24aa;
+    }
+    /* 社交登录按钮 */
+    .social-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #6a1b9a;
+      border: none;
+      padding: 0.75em;
+      margin-bottom: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .social-button:hover {
+      background-color: #8e24aa;
+    }
+    .social-icon {
+      margin-right: 1em;
+      width: 18px;
+      height: 18px;
+    }
+    /* 分割线 */
+    .strike {
+      text-align: center;
+      margin: 1.5em 0;
+      position: relative;
+    }
+    .strike span {
+      background: #432874;
+      padding: 0 1em;
+      position: relative;
+      z-index: 1;
+    }
+    .strike:before, .strike:after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 45%;
+      height: 1px;
+      background: #fff;
+    }
+    .strike:before {
+      right: 100%;
+      text-align: center;
+    }
+    .strike:after {
+      left: 100%;
+    }
+    /* 底部背景 */
+    #bottom-wrap {
+      margin-top: auto; /* 自动占据剩余空间，将 bottom-wrap 推至底部 */
+      position: relative;
+      width: 100%;
+      z-index: 0;
+    }
+    #bottom-background {
+      position: relative;
+    }
+    #bottom-background .seamless_mountains_demo_repeat {
+      background-image: url('{% static 'image/seamless_mountains_demo.png' %}');
+      background-repeat: repeat-x;
+      width: 100%;
+      height: 300px;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      z-index: 0;
+    }
+    #bottom-background .midground_foreground_extended2 {
+      background-image: url('{% static 'image/midground_foreground_extended2.png' %}');
+      position: relative;
+      width: 1500px;
+      max-width: 100%;
+      height: 150px;
+      margin: 0 auto;
+    }
+    /* 忘记密码链接 */
+    .forgot-password {
+      color: #bda8ff;
+      float: right;
+      cursor: pointer;
+    }
+    /* 切换链接 */
+    .toggle-links {
+      text-align: center;
+      margin-top: 1em;
+    }
+    .toggle-link {
+      color: #fff;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-    <h2>用户登录</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">登录</button>
+  <div class="form-wrapper">
+    <!-- 顶部背景（星空） -->
+    <div id="top-background">
+      <div class="seamless_stars_varied_opacity_repeat"></div>
+    </div>
+    <!-- 登录表单 -->
+    <form id="login-form" method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="input-error">
+          {% for error in form.non_field_errors %}
+            {{ error }}<br>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <div class="text-center">
+        <h1 class="welcome-text">🎮 Welcome to <span style="color: #8bc34a;">TimeHero</span> 🎮</h1>
+      </div>
+      <div class="strike">
+        <span>Welcome, please sign in!</span>
+      </div>
+      <!-- 用户名输入 -->
+      <div class="form-group">
+        <label for="{{ form.username.id_for_label }}">Username</label>
+        {{ form.username }}
+        {% if form.username.errors %}
+          {% for error in form.username.errors %}
+            <div class="input-error">{{ error }}</div>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <!-- 密码输入 -->
+      <div class="form-group">
+        <label for="{{ form.password.id_for_label }}">Password</label>
+        <a class="forgot-password" href="">Forgot Password? (to be implemented)</a>
+        {{ form.password }}
+        {% if form.password.errors %}
+          {% for error in form.password.errors %}
+            <div class="input-error">{{ error }}</div>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <!-- 登录按钮 -->
+      <div class="text-center">
+        <button type="submit" class="btn">Login</button>
+      </div>
+      <!-- 切换到注册 -->
+      <div class="toggle-links">
+        <a href="{% url 'signup' %}" class="toggle-link">New user?Sign up now!</a>
+      </div>
     </form>
-    <a href="{% url 'signup' %}">没有账号？注册</a>
+    <!-- 底部背景，始终靠底 -->
+    <div id="bottom-wrap">
+      <div id="bottom-background">
+        <div class="seamless_mountains_demo_repeat"></div>
+        <div class="midground_foreground_extended2"></div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
