@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,26 +9,32 @@
     <link rel="stylesheet" href="{% static 'css/pixel.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
+
 <body class="crt-effect">
     <header>
-        <h1>🎮 Welcome to <span style="color: #8bc34a;">TimeHero</span> 🎮</h1>
-        <nav>
-            {% if user.is_authenticated %}
-                <a class="pixel-btn" href="{% url 'dashboard' %}">Go to Dashboard</a>
-                <!-- <a class="pixel-btn" href="{% url 'index' %}">Logout</a> -->
-            {% else %}
-                <a class="pixel-btn" href="{% url 'login' %}">Login</a>
-                <a class="pixel-btn" href="{% url 'signup' %}">Register</a>
-            {% endif %}
-        </nav>
+        <h1>Welcome to <span style="color: #8bc34a;">TimeHero</span></h1>
     </header>
-
     <div class="pixel-container">
-        <h2>🌍 Explore the World of TimeHero</h2>
-        <p>💡 A pixel-styled app to manage your tasks and level up!</p>
+        <center><h2>🌍 Explore the World of TimeHero</h2></center>
+        <center><p>💡 A pixel-styled app to manage your tasks and level up!</p></center>
         <!-- <img src="{% static 'img/pixel-logo.png' %}" alt="Pixel Logo" class="pixel-logo"> -->
+        {% if user.is_authenticated %}
+        <a class="pixel-btn" href="{% url 'dashboard' %}">Go to Dashboard</a>
+        {% else %}
+        <div class="login-box">
+            <form method="POST" action="{% url 'login' %}">
+                {% csrf_token %}
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit" class="login-btn">Login</button>
+
+            </form>
+            <a href="{% url 'signup' %}" class="register-btn">Register</a>
+        </div>
+        {% endif %}
     </div>
 
     <script src="{% static 'js/game.js' %}"></script>
 </body>
+
 </html>

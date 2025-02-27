@@ -1,0 +1,99 @@
+/* 全局字体设为像素风 */
+body {
+    font-family: 'Press Start 2P', cursive;
+    text-align: center;
+}
+
+/* 注册框 */
+.register-box {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    width: 50%;
+    margin: auto;
+}
+
+/* 输入框 */
+.register-box input {
+    display: block;
+    width: 80%;
+    margin: 10px auto;
+    padding: 10px;
+    font-size: 14px;
+    border: 3px solid black;
+}
+
+.register-box label {
+    font-size: 12px;
+    /* 调小标签字体 */
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* 像素风按钮 */
+.pixel-btn {
+    font-family: 'Press Start 2P', cursive;
+    background: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    text-align: center;
+    border: 3px solid black;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 3px 3px 0 black;
+}
+
+/* 密码提示 */
+.password-hint {
+    font-size: 10px;
+    /* 调小字体 */
+    color: #d32f2f;
+    /* 依然是红色，但更柔和 */
+    margin-top: 5px;
+}
+
+.home-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #4CAF50;
+    color: white;
+    padding: 6px 10px;
+    font-size: 10px;
+    text-align: center;
+    text-decoration: none;
+    border: 2px solid black;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 2px 2px 0 black;
+}
+
+.home-btn:hover {
+    background: #45a049;
+}
+
+.existing-user-text {
+    font-family: "Press Start 2P", cursive;
+    font-size: 10px;
+    /* 调整字号，让它小一点 */
+    text-align: center;
+    margin-top: 10px;
+    /* 调整间距，避免挤压 */
+    color: #7a7a7a;
+    /* 让它稍微变浅，不会喧宾夺主 */
+}
+
+/* 修改 "log in here" 的链接样式 */
+.existing-user-text a {
+    font-size: 10px;
+    /* 让链接字号也跟随变小 */
+    color: #4CAF50;
+    text-decoration: none;
+    /* 取消下划线 */
+}
+
+.existing-user-text a:hover {
+    text-decoration: underline;
+    /* 悬停时再显示下划线 */
+}
