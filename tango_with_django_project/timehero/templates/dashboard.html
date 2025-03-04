@@ -12,6 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/pixel.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 </head>
 
 <body>
@@ -89,7 +91,7 @@
                 </div>
 
                 <!-- "已完成任务" 折叠按钮 -->
-                <button class="pixel-btn toggle-completed-btn" onclick="toggleCompletedTasks()">📂 Show Completed
+                <button class="toggle-completed-btn" onclick="toggleCompletedTasks()">Show Completed
                     Tasks</button>
 
                 <!-- 已完成任务 -->
@@ -189,7 +191,11 @@
 
     <!-- JavaScript -->
     <script src="{% static 'js/script.js' %}"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        flatpickr("#taskStartDate", { enableTime: true, dateFormat: "Y-m-d H:i", locale: "en" });
+        flatpickr("#taskDueDate", { enableTime: true, dateFormat: "Y-m-d H:i", locale: "en" });
+    </script>
 </body>
 
 </html>

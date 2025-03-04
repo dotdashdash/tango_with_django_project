@@ -43,7 +43,7 @@ header {
 .pixel-btn,.complete-task-btn,
 .toggle-completed-btn {
   display: inline-block;
-  margin: 10px;
+  margin: 10px auto;
   width: 100%;
   text-decoration: none;
   text-align: center;

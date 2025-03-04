@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
             completeTask(taskId, event);
         }
     });
+    document.querySelector(".toggle-completed-btn").addEventListener("click", toggleCompletedTasks);
 });
 
 function showToast(message, duration = 3000) {
@@ -313,17 +314,20 @@ function updateTaskBoard(tasks) {
 // `;
 // }
 function toggleCompletedTasks() {
-    var completedTasks = document.getElementById("completed-tasks");
-    var btn = document.querySelector(".toggle-completed-btn");
+    let completedTaskSection = document.querySelector(".completed-task-list");
+    let toggleButton = document.querySelector(".toggle-completed-btn");
 
-    if (completedTasks.style.display === "none") {
-        completedTasks.style.display = "block";
-        btn.textContent = "📂 Hide Completed Tasks";
+    if (completedTaskSection.style.display === "none" || completedTaskSection.style.display === "") {
+        // ✅ 显示已完成任务
+        completedTaskSection.style.display = "block";
+        toggleButton.innerHTML = "📂 Hide Completed Tasks";
     } else {
-        completedTasks.style.display = "none";
-        btn.textContent = "📂 Show Completed Tasks";
+        // ✅ 隐藏已完成任务
+        completedTaskSection.style.display = "none";
+        toggleButton.innerHTML = "📂 Show Completed Tasks";
     }
 }
+
 /**
  * 更新任务地图
  */
@@ -379,5 +383,23 @@ function getCookie(name) {
  */
 function formatDate(isoString) {
     let date = new Date(isoString);
-    return date.toLocaleString();
+    return date.toLocaleString("en-GB", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+}
+
+/**
+ * 确保 datetime-local 格式一致
+ */
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('input[type="datetime-local"]').forEach(input => {
+        input.addEventListener("focus", () => forceISOFormat(input));
+        forceISOFormat(input); // 确保格式
+    });
+});
+
+function forceISOFormat(input) {
+    if (!input || !input.value) return;
+    let date = new Date(input.value);
+    if (!isNaN(date.getTime())) {
+        input.value = date.toISOString().slice(0, 16);
+    }
 }
