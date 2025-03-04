@@ -21,6 +21,7 @@ header {
   color: white;
   text-align: center;
   font-size: 20px;
+  overflow: hidden;
 }
 
 .pixel-container {
@@ -39,7 +40,8 @@ header {
   background: transparent !important;
 }
 
-.pixel-btn {
+.pixel-btn,.complete-task-btn,
+.toggle-completed-btn {
   display: inline-block;
   margin: 10px;
   width: 100%;
@@ -132,7 +134,7 @@ header {
 }
 
 /* 状态栏 */
-.status-bar {
+/* .status-bar {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
@@ -140,13 +142,9 @@ header {
   background: #333;
   border: 3px solid #4a4a4a;
   margin-bottom: 20px;
-}
+} */
 
-.status-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+
 
 .pixel-icon {
   width: 24px;
@@ -206,24 +204,7 @@ header {
   border: 3px solid #4a4a4a;
 } */
 
-.task-card {
-  background: #222;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-left: 4px solid;
-}
 
-.difficulty-1 {
-  border-color: #8bc34a;
-}
-
-.difficulty-2 {
-  border-color: #ffc107;
-}
-
-.difficulty-3 {
-  border-color: #f44336;
-}
 
 /* 添加 CSS */
 .toast {
