@@ -16,6 +16,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from django.http import JsonResponse
 
 def index(request):
     return render(request, 'index.html')
@@ -89,22 +90,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
                 experience_to_next_level = to_next_level(user.level)
                 user.hp = MAX_HEALTH
-                #
-                # allocated_stat_points = user.strength + user.intelligence + user.constitution + user.perception
-                # total_stat_points = allocated_stat_points + user.stat_points
-                #
-                # if total_stat_points < MAX_STAT_POINTS:
-                #     if user.automatic_allocation:
-                #         auto_allocate(user)
-                #     else:
-                #         user.stat_points = user.level - allocated_stat_points
-                #         total_stat_points = user.stat_points + allocated_stat_points
-                #
-                #         if total_stat_points > MAX_STAT_POINTS:
-                #             user.stat_points = MAX_STAT_POINTS - allocated_stat_points
-                #
-                #         if user.stat_points < 0:
-                #             user.stat_points = 0
+
             user.save()
 
             if leveled_up:
@@ -124,3 +110,16 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     def profile(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+def check_username(request):
+    username = request.GET.get('value', None)
+    if username and User.objects.filter(username=username).exists():
+        return JsonResponse({'available': False})
+    return JsonResponse({'available': True})
+
+def check_email(request):
+    email = request.GET.get('value', None)
+    if email and User.objects.filter(email=email).exists():
+        return JsonResponse({'available': False})
+    return JsonResponse({'available': True})
+    

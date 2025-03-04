@@ -100,15 +100,14 @@
             <!-- Hidden taskId input field -->
         <input type="hidden" id="taskId" name="taskId" value="">
 
-            <!-- 标题 -->
+
             <label for="taskTitle">Title:</label>
             <input type="text" id="taskTitle" name="title" required oninput="predictDifficulty()">
 
-            <!-- 备注（Notes）: todo: Markdown 支持可后续实现 -->
             <label for="taskNotes">Notes: <em>[todo: Markdown formatting help]</em></label>
             <textarea id="taskNotes" name="notes" placeholder="Add any notes here..."></textarea>
 
-            <!-- Checklist: todo: 这里可以使用JS动态添加子任务 -->
+
             <label for="taskChecklist">Checklist: <em>[todo]</em></label>
             <div id="taskChecklist">
                 <!-- e.g. <input type="checkbox" name="subtask1" /> Subtask 1 -->

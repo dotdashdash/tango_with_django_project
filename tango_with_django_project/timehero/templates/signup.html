@@ -4,16 +4,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>注册</title>
+    <title>Sign Up</title>
     <link rel="stylesheet" href="{% static 'css/pixel.css' %}">
+    <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
+    <!-- 引入 Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .welcome-text {
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+        }
+        .form-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #4f2a93, #6133b4);
+            position: relative;
+            font-family: 'Varela Round', sans-serif;
+        }
+        #top-background .seamless_stars_varied_opacity_repeat {
+            background-image: url('{% static 'image/seamless_stars_varied_opacity.png' %}');
+            background-repeat: repeat-x;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 500px;
+            width: 100%;
+        }
+        #signup-form {
+            margin: 0 auto;
+            width: 40em;
+            padding-top: 5em;
+            padding-bottom: 4em;
+            position: relative;
+            z-index: 1;
+            color: #fff;
+        }
+        #signup-form label {
+            color: #fff;
+            font-weight: bold;
+        }
+        #signup-form input, #signup-form select {
+            margin-bottom: 2em;
+            border-radius: 2px;
+            background-color: #432874;
+            border: none;
+            height: 50px;
+            padding: 0 1em;
+            color: #fff;
+        }
+        #signup-form .btn {
+            width: 100%;
+            padding: 0.75em;
+            font-size: 18px;
+            border: none;
+            background-color: #8e24aa;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #signup-form .btn:hover {
+            background-color: #f3e5f5;
+            color: #8e24aa;
+        }
+        .strike {
+            text-align: center;
+            margin: 1.5em 0;
+            position: relative;
+        }
+        .strike span {
+            background: #432874;
+            padding: 0 1em;
+            position: relative;
+            z-index: 1;
+        }
+        .strike:before, .strike:after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: #fff;
+        }
+        .strike:before {
+            right: 100%;
+            text-align: center;
+        }
+        .strike:after {
+            left: 100%;
+        }
+        #bottom-wrap {
+            margin-top: auto;
+            position: relative;
+            width: 100%;
+            z-index: 0;
+        }
+        #bottom-background {
+            position: relative;
+        }
+        #bottom-background .seamless_mountains_demo_repeat {
+            background-image: url('{% static 'image/seamless_mountains_demo.png' %}');
+            background-repeat: repeat-x;
+            width: 100%;
+            height: 300px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 0;
+        }
+        #bottom-background .midground_foreground_extended2 {
+            background-image: url('{% static 'image/midground_foreground_extended2.png' %}');
+            position: relative;
+            width: 1500px;
+            max-width: 100%;
+            height: 150px;
+            margin: 0 auto;
+        }
+        .toggle-links {
+            text-align: center;
+            margin-top: 1em;
+        }
+        .toggle-link {
+            color: #fff;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .input-error {
+            color: #ff6b6b;
+            font-size: 90%;
+            margin-top: -1em;
+            margin-bottom: 1em;
+        }
+    </style>
+    <!-- 引入 Bootstrap JS 和 Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        async function checkAvailability(field, value) {
+            const response = await fetch(`/api/check_${field}/?value=${value}`);
+            const data = await response.json();
+            return data.available;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const usernameInput = document.querySelector('input[name="username"]');
+            const emailInput = document.querySelector('input[name="email"]');
+            const alertBox = document.getElementById('alert-box');
+
+            function showAlert(message, type) {
+                alertBox.textContent = message;
+                alertBox.className = `alert alert-${type}`;
+                alertBox.style.display = 'block';
+            }
+
+            usernameInput.addEventListener('blur', async () => {
+                if (usernameInput.value.trim() === '') {
+                    showAlert('Please enter a username', 'warning');
+                    return;
+                }
+                const available = await checkAvailability('username', usernameInput.value);
+                if (!available) {
+                    showAlert('Username is already taken', 'danger');
+                } else {
+                    showAlert('Username is available', 'success');
+                }
+            });
+
+            emailInput.addEventListener('blur', async () => {
+                if (emailInput.value.trim() === '') {
+                    showAlert('Please enter an email', 'warning');
+                    return;
+                }
+                const available = await checkAvailability('email', emailInput.value);
+                if (!available) {
+                    showAlert('Email is already taken', 'danger');
+                } else {
+                    showAlert('Email is available', 'success');
+                }
+            });
+        });
+    </script>
 </head>
 <body>
-    <h2>用户注册</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">注册</button>
-    </form>
-    <a href="{% url 'login' %}">已有账号？登录</a>
+    <div class="form-wrapper">
+        <div id="top-background">
+            <div class="seamless_stars_varied_opacity_repeat"></div>
+        </div>
+        <div id="alert-box" class="alert" style="display: none;"></div>
+        <form id="signup-form" method="post">
+            {% csrf_token %}
+            <div class="text-center">
+                <h1 class="welcome-text">🎮 Welcome to <span style="color: #8bc34a;">TimeHero</span> 🎮</h1>
+            </div>
+            <div class="strike">
+                <span>Join us, please sign up!</span>
+            </div>
+            {{ form.as_p }}
+            <button type="submit" class="btn">Sign Up</button>
+            <div class="toggle-links">
+                <a href="{% url 'login' %}" class="toggle-link">Already have an account? Log in</a>
+            </div>
+        </form>
+        <div id="bottom-wrap">
+            <div id="bottom-background">
+                <div class="seamless_mountains_demo_repeat"></div>
+                <div class="midground_foreground_extended2"></div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
