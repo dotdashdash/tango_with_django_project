@@ -1,608 +1,199 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - TimeHero</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/pixel.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 </head>
+
 <body>
 
-<!-- 状态栏 -->
-<div class="status-bar">
-    <div class="status-item">
-        <img src="{% static 'sprites/hero.png' %}" class="pixel-icon">
-        <span>Lv.{{ user.level }}</span> | <span>{{ user.username }}</span>
-    </div>
-    <div class="status-item">
-        ❤️ <span id="hp">{{ user.hp }}</span>/5
-    </div>
-    <div class="status-item">
-        <img src="{% static 'sprites/coins.png' %}" class="pixel-icon">
-        <span id="exp">{{ user.exp }}</span> EXP
-    </div>
-    <!-- 🚀 Logout 按钮 -->
-    <div class="status-item logout">
-        <form action="{% url 'logout' %}?next={% url 'index' %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="pixel-btn logout-btn">🚪 Logout</button>
-        </form>
-    </div>
-</div>
-
-<!-- 任务地图 -->
-<div class="pixel-map">
-    {% for task in tasks %}
-        <div class="map-tile {% if task.is_completed %}completed{% endif %}" 
-             data-task-id="{{ task.id }}"
-             data-position-x="{{ task.position_x }}"
-             data-position-y="{{ task.position_y }}">
-            {% if task.difficulty == 3 %}🔥{% else %}📜{% endif %}
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="status-item">
+            <img src="{% static 'sprites/hero.png' %}" class="pixel-icon">
+            <span>Lv.{{ user.level }}</span> | <span>{{ user.username }}</span>
         </div>
-    {% endfor %}
-</div>
+        <div class="status-item">
+            ❤️ <span id="hp">{{ user.hp }}</span>/5
+        </div>
+        <div class="status-item">
+            <img src="{% static 'sprites/coins.png' %}" class="pixel-icon">
+            <span id="exp">{{ user.exp }}</span> EXP
+        </div>
+        <!-- 🚀 Logout 按钮 -->
+        <div class="status-item logout">
+            <form action="{% url 'logout' %}?next={% url 'index' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="pixel-btn logout-btn">🚪 Logout</button>
+            </form>
+        </div>
+    </div>
+    <div class="main-content">
 
-<!-- 任务面板 -->
-<div class="task-board">
-    <h2 class="pixel-title">📋 Task Board</h2>
-    <button class="pixel-btn" onclick="toggleTaskModal()">➕ New Task</button>
-    <div class="task-list">
-        {% for task in tasks %}
-        {% if task.user == request.user%}
-        <div class="task-card {% if task.is_completed %}completed{% endif %}" id="task-{{ task.id }}">
-            <div class="task-header">
-                <span class="difficulty-{{ task.difficulty }}">
-                    {{ task.get_difficulty_display }}
-                </span>
-                {% if not task.is_completed %}
-                <button class="pixel-btn complete-task-btn" data-task-id="{{ task.id }}">
-                    ✅ Complete
-                </button>
-                {% else %}
-                <span class="completed-text">✔️ Done</span>
-                {% endif %}
-            </div>
-            <p class="task-title">{{ task.title }}</p>
+        <div class="task-board">
+            <h2 class="pixel-title">📋 Task Board</h2>
+            <button class="pixel-btn" onclick="openTaskModal()">➕ New Task</button>
 
-            <!-- 任务详情部分，只有未完成的任务才显示 -->
-            <div class="task-details" {% if task.is_completed %}style="display: none;"{% endif %}>
-                {% if task.start_date %}
-                <p class="task-time">🕒 Start: {{ task.start_date|date:"Y/m/d H:i" }}</p>
-                {% endif %}
-                {% if task.due_date %}
-                <p class="task-due">⏳ Due: {{ task.due_date|date:"Y/m/d H:i" }}</p>
-                {% endif %}
+            <div class="task-list-container">
+                <!-- 未完成任务 -->
+                <div id="active-tasks">
+                    <h3>📝 Active Tasks</h3>
+                    <div class="task-list">
+                        {% for task in tasks %}
+                        {% if task.user == request.user and not task.is_completed %}
+                        <div class="task-card" id="task-{{ task.id }}">
+                            <div class="task-header">
+                                <span class="difficulty-{{ task.difficulty }}">
+                                    {{ task.get_difficulty_display }}
+                                </span>
+                                <button class="complete-task-btn" data-task-id="{{ task.id }}">
+                                    ✅ Complete
+                                </button>
+                            </div>
+                            <p class="task-title">{{ task.title }}</p>
+
+                            <div class="task-details">
+                                {% if task.start_date %}
+                                <p class="task-time">🕒 Start: {{ task.start_date|date:"Y/m/d H:i" }}</p>
+                                {% endif %}
+                                {% if task.due_date %}
+                                <p class="task-due">⏳ Due: {{ task.due_date|date:"Y/m/d H:i" }}</p>
+                                {% endif %}
+                                {% if task.tags_list %}
+                                <p class="task-tags">🏷️ Tags:
+                                    {% for tag in task.tags_list %} #{{ tag }} {% endfor %}
+                                </p>
+                                {% endif %}
+                                {% if task.checklist_items %}
+                                <p class="task-checklist">✅ Checklist:<br>
+                                    {% for item in task.checklist_items %} ✅ {{ item }}<br> {% endfor %}
+                                </p>
+                                {% endif %}
+                                {% if task.notes_content %}
+                                <p class="task-notes">📝 Notes:<br> {{ task.notes_content }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- "已完成任务" 折叠按钮 -->
+                <button class="toggle-completed-btn" onclick="toggleCompletedTasks()">Show Completed
+                    Tasks</button>
+
+                <!-- 已完成任务 -->
+                <div id="completed-tasks" style="display: none;">
+                    <h3>✅ Completed Tasks</h3>
+                    <div class="completed-task-list">
+                        {% for task in tasks %}
+                        {% if task.user == request.user and task.is_completed %}
+                        <div class="task-card completed" id="task-{{ task.id }}">
+                            <div class="task-header">
+                                <span class="difficulty-{{ task.difficulty }}">
+                                    {{ task.get_difficulty_display }}
+                                </span>
+                                <span class="completed-text">✔️ Done</span>
+                            </div>
+                            <p class="task-title">{{ task.title }}</p>
+
+                            <div class="task-details">
+                                {% if task.start_date %}
+                                <p class="task-time">🕒 Start: {{ task.start_date|date:"Y/m/d H:i" }}</p>
+                                {% endif %}
+                                {% if task.due_date %}
+                                <p class="task-due">⏳ Due: {{ task.due_date|date:"Y/m/d H:i" }}</p>
+                                {% endif %}
+                                {% if task.tags_list %}
+                                <p class="task-tags">🏷️ Tags:
+                                    {% for tag in task.tags_list %} #{{ tag }} {% endfor %}
+                                </p>
+                                {% endif %}
+                                {% if task.checklist_items %}
+                                <p class="task-checklist">✅ Checklist:<br>
+                                    {% for item in task.checklist_items %} ✅ {{ item }}<br> {% endfor %}
+                                </p>
+                                {% endif %}
+                                {% if task.notes_content %}
+                                <p class="task-notes">📝 Notes:<br> {{ task.notes_content }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         </div>
-        {% endif %}
-        {% endfor %}
+
+        <!-- 任务地图 -->
+        <div class="pixel-map">
+            {% for task in tasks %}
+            <div class="map-tile {% if task.is_completed %}completed{% endif %}" data-task-id="{{ task.id }}"
+                data-position-x="{{ task.position_x }}" data-position-y="{{ task.position_y }}">
+                {% if task.difficulty == 3 %}🔥{% else %}📜{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
     </div>
-</div>
 
-<!-- 任务创建/编辑模态框 -->
-<div id="taskModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <!-- 关闭按钮 -->
-        <span class="close" onclick="toggleTaskModal()">&times;</span>
+    <!-- 任务创建模态框 -->
+    <div id="taskModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeTaskModal()">&times;</span>
+            <h2>Create New Task</h2>
+            <form id="taskForm" method="POST" action="{% url 'task-list' %}">
+                {% csrf_token %}
 
-        <!-- 模态框标题，可根据需要改为“Create New Task”或“Edit To Do” -->
-        <h2>Edit To Do</h2>
+                <label>Task Title:</label>
+                <input type="text" id="taskTitle" name="title" required oninput="predictDifficulty()">
 
-        <!-- 示例：在这里加一句提示（todo: 完善逻辑） -->
-        <p class="modal-instruction">
-            You can either complete this To-Do, edit it, or remove it. <strong>[todo: 具体功能待实现]</strong>
-        </p>
+                <label>Start Time:</label>
+                <input type="datetime-local" id="taskStartDate" name="start_date">
 
-        <!-- 表单开始 -->
-        <form id="taskForm" method="POST" action="{% url 'task-list' %}">
-            {% csrf_token %}
-            <!-- Hidden taskId input field -->
-        <input type="hidden" id="taskId" name="taskId" value="">
+                <label>Due Date:</label>
+                <input type="datetime-local" id="taskDueDate" name="due_date" onchange="calculateDuration()">
 
+                <label for="taskPriority">High Priority:</label>
+                <input type="checkbox" id="taskPriority" name="priority" value="true">
 
-            <label for="taskTitle">Title:</label>
-            <input type="text" id="taskTitle" name="title" required oninput="predictDifficulty()">
+                <label>Difficulty:</label>
+                <span id="difficultyDisplay">Easy</span>
+                <input type="hidden" id="taskDifficulty" name="difficulty">
 
-            <label for="taskNotes">Notes: <em>[todo: Markdown formatting help]</em></label>
-            <textarea id="taskNotes" name="notes" placeholder="Add any notes here..."></textarea>
+                <div class="tags-container">
+                    <label>Tags:</label>
+                    <input type="text" id="taskTags" name="tags" placeholder="e.g. work, study, exercise">
+                </div>
 
+                <label>Checklist:</label>
+                <textarea id="taskChecklist" name="checklist" placeholder="e.g. task 1, task 2, task 3"></textarea>
 
-            <label for="taskChecklist">Checklist: <em>[todo]</em></label>
-            <div id="taskChecklist">
-                <!-- e.g. <input type="checkbox" name="subtask1" /> Subtask 1 -->
-            </div>
-
-            <!-- 难度（Difficulty）: 保留原有难度显示和隐藏域，以免破坏原有功能 -->
-            <label>Difficulty:</label>
-            <span id="difficultyDisplay">Easy</span>
-            <!-- 隐藏域，和原来的JS逻辑保持一致 -->
-            <input type="hidden" id="taskDifficulty" name="difficulty">
-
-            <!-- 到期时间 -->
-            <label for="taskDueDate">Due Date:</label>
-            <input type="datetime-local" id="taskDueDate" name="due_date" onchange="calculateDuration()">
-
-            <!-- Tags: todo -->
-            <label for="taskTags">Tags: <em>[todo]</em></label>
-            <input type="text" id="taskTags" name="tags" placeholder="e.g. Work, Personal">
-
-            <!-- 原有字段：开始时间 -->
-            <label for="taskStartDate">Start Time:</label>
-            <input type="datetime-local" id="taskStartDate" name="start_date">
-
-            <!-- 原有字段：优先级 -->
-            <label for="taskPriority">High Priority:</label>
-            <input type="checkbox" id="taskPriority" name="priority" value="true">
-
-            <!-- 示例：删除按钮（todo: 实现删除逻辑） -->
-            <button type="button" class="pixel-btn" style="background-color: #ff4e4e;"
-                    onclick="alert('todo: implement delete logic');">
-                Delete this To-Do <em>[todo]</em>
-            </button>
-
-            <!-- 提交/保存按钮 -->
-            <button type="submit" class="pixel-btn">Save</button>
-
-            <!-- 取消按钮 -->
-            <button type="button" class="pixel-btn" onclick="toggleTaskModal()">
-                Cancel
-            </button>
-        </form>
+                <label>Notes:</label>
+                <textarea id="taskNotes" name="notes" placeholder="Additional notes..."></textarea>
+                <button type="submit" class="pixel-btn">Submit</button>
+            </form>
+        </div>
     </div>
-</div>
 
-<!-- 建议在 <head> 或单独的 CSS 文件中添加以下样式 -->
-<style>
-  /* ========== Modal 样式 ========== */
-  .modal {
-      display: none;
-      position: fixed;
-      z-index: 999;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0, 0, 0, 0.5);
-  }
-  .modal-content {
-      background-color: #fefefe;
-      margin: 10% auto;
-      padding: 20px;
-      border: 1px solid #888;
-      width: 400px;
-      position: relative;
-      border-radius: 5px;
-  }
-  .close {
-      color: #aaa;
-      float: right;
-      font-size: 28px;
-      font-weight: bold;
-      cursor: pointer;
-  }
-  .close:hover,
-  .close:focus {
-      color: #000;
-      text-decoration: none;
-  }
-
-  /* ========== Toast 样式 ========== */
-  .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #333;
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 5px;
-      opacity: 0.9;
-      z-index: 10000;
-      font-size: 14px;
-  }
-
-  /* ========== 粒子特效 ========== */
-  .pixel-particle {
-      position: absolute;
-      width: 5px;
-      height: 5px;
-      background: gold;
-      border-radius: 50%;
-      animation: particle-fall 1s linear;
-  }
-  @keyframes particle-fall {
-      0% {
-          transform: translateY(0) scale(1);
-          opacity: 1;
-      }
-      100% {
-          transform: translateY(-100px) scale(0);
-          opacity: 0;
-      }
-  }
-
-  /* 其他可根据需求自定义，如 .pixel-btn, .task-card, .completed-text 等 */
-</style>
-
-<script>
-/* 当页面加载完毕后执行 */
-document.addEventListener("DOMContentLoaded", function () {
-    // 监听表单相关事件
-    document.getElementById("taskTitle").addEventListener("input", predictDifficulty);
-    document.getElementById("taskPriority").addEventListener("change", predictDifficulty);
-    document.getElementById("taskDueDate").addEventListener("change", calculateDuration);
-    document.getElementById("taskStartDate").addEventListener("change", calculateDuration);
-    document.getElementById("taskForm").addEventListener("submit", submitTask);
-
-    // 初始加载任务
-    fetchTasks();
-
-    // 监听任务列表中的按钮点击（完成 / 编辑 / 删除等）
-    document.querySelector(".task-list").addEventListener("click", function (event) {
-        if (event.target.closest(".complete-task-btn")) {
-            let taskId = event.target.closest(".complete-task-btn").dataset.taskId;
-            completeTask(taskId, event);
-        } else if (event.target.closest(".edit-task-btn")) {
-            let taskId = event.target.closest(".edit-task-btn").dataset.taskId;
-            editTask(taskId);
-        } else if (event.target.closest(".delete-task-btn")) {
-            let taskId = event.target.closest(".delete-task-btn").dataset.taskId;
-            deleteTask(taskId);
-        }
-    });
-});
-
-/**
- * Toast 提示
- */
-function showToast(message, duration = 3000) {
-    const toast = document.createElement("div");
-    toast.className = "toast";
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), duration);
-}
-
-/**
- * 显示/隐藏任务创建/编辑表单的 Modal
- */
-function toggleTaskModal(forceClose = false) {
-    let modal = document.getElementById("taskModal");
-    // 若 forceClose 为 true，则强制隐藏
-    if (forceClose) {
-        modal.style.display = "none";
-        return;
-    }
-    modal.style.display = (modal.style.display === "none" || modal.style.display === "") ? "block" : "none";
-}
-
-/**
- * 清空并重置表单内容
- */
-function resetTaskForm() {
-    document.getElementById("taskForm").reset();
-    // 重置隐藏域
-    document.getElementById("taskId").value = "";
-    // 重置难度显示
-    document.getElementById("difficultyDisplay").textContent = "Easy";
-    document.getElementById("taskDifficulty").value = 1;
-}
-
-/**
- * 计算任务时长（基于 Start Time 和 Due Date），并调用 predictDifficulty
- */
-function calculateDuration() {
-    let startInput = document.getElementById("taskStartDate").value;
-    let dueInput = document.getElementById("taskDueDate").value;
-
-    if (!dueInput) return;  // 确保至少有 Due Date
-
-    let startDate = startInput ? new Date(startInput) : new Date();
-    let dueDate = new Date(dueInput);
-
-    let durationMinutes = Math.round((dueDate - startDate) / 60000);
-
-    predictDifficulty(durationMinutes);
-    if (dueDate < startDate) {
-        showToast("截止日期不能早于开始日期");
-        document.getElementById("taskDueDate").value = "";
-        return;
-    }
-}
-
-/**
- * 根据任务标题、时长和优先级预测任务难度
- * @param {number} duration - 任务持续时间（分钟），默认30
- */
-function predictDifficulty(duration = 30) {
-    let title = document.getElementById("taskTitle").value.toLowerCase();
-    let isHighPriority = document.getElementById("taskPriority").checked;
-    let difficulty = 1;
-
-    const keywordsHard = ["report", "study", "presentation", "deadline", "research"];
-    const keywordsMedium = ["exercise", "meeting", "cleaning", "shopping"];
-
-    // 关键词判断
-    if (keywordsHard.some(word => title.includes(word))) {
-        difficulty = 3;
-    } else if (keywordsMedium.some(word => title.includes(word))) {
-        difficulty = 2;
-    }
-
-    // 时长判断
-    if (duration > 120) {
-        difficulty = Math.max(difficulty, 3);
-    } else if (duration > 60) {
-        difficulty = Math.max(difficulty, 2);
-    }
-
-    // 优先级判断
-    if (isHighPriority) {
-        difficulty = Math.min(3, difficulty + 1);
-    }
-
-    let difficultyDisplay = ["Easy", "Medium", "Hard"];
-    document.getElementById("difficultyDisplay").textContent = difficultyDisplay[difficulty - 1];
-    document.getElementById("taskDifficulty").value = difficulty;
-}
-
-/**
- * 获取并刷新任务列表
- */
-async function fetchTasks() {
-    try {
-        const response = await fetch("/api/tasks/", {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem("token")}`
-            }
-        });
-        if (!response.ok) throw new Error("Failed to load tasks");
-        const tasks = await response.json();
-        updateTaskBoard(tasks);
-        updateTaskMap(tasks);
-    } catch (error) {
-        console.error("任务加载失败:", error);
-    }
-}
-
-/**
- * 提交任务表单（区分新建或更新）
- */
-async function submitTask(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const taskId = document.getElementById("taskId").value.trim();
-
-    // 根据是否有 taskId 判断是新建还是更新
-    let url = "/api/tasks/";
-    let method = "POST";
-    if (taskId) {
-        url = `/api/tasks/${taskId}/`;
-        method = "PUT";  // 更新
-    }
-
-    try {
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                "X-CSRFToken": getCookie("csrftoken"),
-            },
-            body: formData
-        });
-
-        if (response.ok) {
-            toggleTaskModal(true); // 关闭弹窗
-            resetTaskForm();       // 重置表单
-            fetchTasks();          // 重新加载任务
-        } else {
-            console.error("任务创建/更新失败");
-        }
-    } catch (error) {
-        console.error("任务提交失败:", error);
-    }
-}
-
-/**
- * 编辑任务：获取现有任务数据，填充到表单后打开弹窗
- */
-async function editTask(taskId) {
-    try {
-        const response = await fetch(`/api/tasks/${taskId}/`, {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem("token")}`
-            }
-        });
-        if (!response.ok) throw new Error("Failed to fetch task data");
-        const task = await response.json();
-
-        // 填充表单
-        document.getElementById("taskId").value = task.id;
-        document.getElementById("taskTitle").value = task.title || "";
-        document.getElementById("taskNotes").value = task.notes || "";
-        document.getElementById("taskDueDate").value = task.due_date
-            ? new Date(task.due_date).toISOString().slice(0, 16)
-            : "";
-        document.getElementById("taskStartDate").value = task.start_date
-            ? new Date(task.start_date).toISOString().slice(0, 16)
-            : "";
-        document.getElementById("taskPriority").checked = !!task.priority;
-        document.getElementById("taskDifficulty").value = task.difficulty || 1;
-        document.getElementById("difficultyDisplay").textContent = ["Easy","Medium","Hard"][ (task.difficulty || 1) - 1 ];
-
-        // 打开弹窗
-        toggleTaskModal();
-    } catch (error) {
-        console.error("编辑任务时获取数据失败:", error);
-    }
-}
-
-/**
- * 完成任务
- */
-async function completeTask(taskId, event) {
-    try {
-        const response = await fetch(`/api/tasks/${taskId}/complete/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            // 前端直接更新UI
-            let taskCard = document.getElementById(`task-${taskId}`);
-            if (taskCard) {
-                let details = taskCard.querySelector(".task-details");
-                if (details) details.style.display = "none";
-
-                let completeButton = taskCard.querySelector(".complete-task-btn");
-                if (completeButton) completeButton.remove();
-
-                let doneBadge = document.createElement("span");
-                doneBadge.className = "completed-text";
-                doneBadge.textContent = "✔️ Done";
-                taskCard.querySelector(".task-header").appendChild(doneBadge);
-            }
-
-            // 粒子特效
-            if (event) createParticles(event.clientX, event.clientY);
-
-            // 更新经验值
-            if (data.exp !== undefined) {
-                document.getElementById("exp").textContent = data.exp;
-            }
-        } else {
-            console.error("Task completion failed");
-        }
-    } catch (error) {
-        console.error("Task completion request error:", error);
-    }
-}
-
-/**
- * 删除任务（示例）
- */
-async function deleteTask(taskId) {
-    if (!confirm("Are you sure to delete this task?")) return;
-    try {
-        const response = await fetch(`/api/tasks/${taskId}/`, {
-            method: "DELETE",
-            headers: {
-                "X-CSRFToken": getCookie("csrftoken"),
-                "Authorization": `Bearer ${localStorage.getItem("token")}`
-            }
-        });
-        if (response.ok) {
-            showToast("Task deleted successfully");
-            fetchTasks();
-        } else {
-            console.error("Task deletion failed");
-        }
-    } catch (error) {
-        console.error("Delete request error:", error);
-    }
-}
-
-/**
- * 更新任务面板
- */
-function updateTaskBoard(tasks) {
-    const taskList = document.querySelector(".task-list");
-    taskList.innerHTML = "";
-
-    tasks.forEach(task => {
-        let taskElement = document.createElement("div");
-        taskElement.className = `task-card ${task.is_completed ? "completed" : ""}`;
-        taskElement.id = `task-${task.id}`;
-
-        taskElement.innerHTML = `
-            <div class="task-header">
-                <span class="difficulty-${task.difficulty}">
-                    ${["Easy", "Medium", "Hard"][task.difficulty - 1]}
-                </span>
-                ${task.is_completed ? `<span class="completed-text">✔️ Done</span>` : ""}
-                <p class="task-title">${task.title}</p>
-            </div>
-            <div class="task-details" style="display: ${task.is_completed ? 'none' : 'block'};">
-                ${task.start_date ? `<p class="task-start">🚀 Start: <span>${formatDate(task.start_date)}</span></p>` : ""}
-                ${task.due_date ? `<p class="task-due">⏳ Due: <span>${formatDate(task.due_date)}</span></p>` : ""}
-            </div>
-            ${
-              !task.is_completed
-              ? `<button class="pixel-btn complete-task-btn" data-task-id="${task.id}">✅ Complete</button>
-                 <button class="pixel-btn edit-task-btn" data-task-id="${task.id}">✏️ Edit</button>
-                 <button class="pixel-btn delete-task-btn" data-task-id="${task.id}">❌ Delete</button>`
-              : ""
-            }
-        `;
-        taskList.appendChild(taskElement);
-    });
-}
-
-/**
- * 更新任务地图
- */
-function updateTaskMap(tasks) {
-    const map = document.querySelector(".pixel-map");
-    map.innerHTML = "";
-
-    tasks.forEach(task => {
-        let mapTile = document.createElement("div");
-        mapTile.className = `map-tile ${task.is_completed ? "completed" : ""}`;
-        mapTile.dataset.taskId = task.id;
-        mapTile.dataset.positionX = task.position_x || 1;
-        mapTile.dataset.positionY = task.position_y || 1;
-
-        // 如果使用 CSS Grid，需要设置 gridColumn / gridRow
-        mapTile.style.gridColumn = task.position_x || 1;
-        mapTile.style.gridRow = task.position_y || 1;
-
-        mapTile.innerHTML = task.difficulty === 3 ? "🔥" : "📜";
-        map.appendChild(mapTile);
-    });
-}
-
-/**
- * 粒子特效
- */
-function createParticles(x, y) {
-    for (let i = 0; i < 20; i++) {
-        const particle = document.createElement("div");
-        particle.className = "pixel-particle";
-        particle.style.left = `${x}px`;
-        particle.style.top = `${y}px`;
-        document.body.appendChild(particle);
-        setTimeout(() => particle.remove(), 1000);
-    }
-}
-
-/**
- * 获取 CSRF 令牌
- */
-function getCookie(name) {
-    let cookieValue = null;
-    document.cookie.split(";").forEach(cookie => {
-        if (cookie.trim().startsWith(name + "=")) {
-            cookieValue = decodeURIComponent(cookie.split("=")[1]);
-        }
-    });
-    return cookieValue;
-}
-
-/**
- * 格式化日期
- */
-function formatDate(isoString) {
-    let date = new Date(isoString);
-    return date.toLocaleString();
-}
-</script>
-
+    <!-- JavaScript -->
+    <script src="{% static 'js/script.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        flatpickr("#taskStartDate", { enableTime: true, dateFormat: "Y-m-d H:i", locale: "en" });
+        flatpickr("#taskDueDate", { enableTime: true, dateFormat: "Y-m-d H:i", locale: "en" });
+    </script>
 </body>
+
 </html>

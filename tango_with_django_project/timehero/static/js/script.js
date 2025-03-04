@@ -24,10 +24,27 @@ function showToast(message, duration = 3000) {
 /**
  * 显示/隐藏任务创建表单
  */
-function toggleTaskModal() {
-    let modal = document.getElementById("taskModal");
-    modal.style.display = (modal.style.display === "none" || modal.style.display === "") ? "block" : "none";
+// function toggleTaskModal() {
+//     let modal = document.getElementById("taskModal");
+//     modal.style.display = (modal.style.display === "none" || modal.style.display === "") ? "block" : "none";
+// }
+// 打开任务创建模态框
+function openTaskModal() {
+    document.getElementById("taskModal").style.display = "flex";
 }
+
+// 关闭任务创建模态框
+function closeTaskModal() {
+    document.getElementById("taskModal").style.display = "none";
+}
+
+// 监听 ESC 键，按下后关闭模态框
+window.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+        closeTaskModal();
+    }
+});
+
 
 /**
  * 计算任务时长（基于 Start Time 和 Due Date）
@@ -116,7 +133,7 @@ async function submitTask(event) {
         });
 
         if (response.ok) {
-            toggleTaskModal();
+            closeTaskModal();
             fetchTasks();  // 重新加载任务
         } else {
             console.error("任务创建失败");
@@ -144,10 +161,10 @@ async function completeTask(taskId, event) {
             let taskCard = document.getElementById(`task-${taskId}`);
             if (taskCard) {
                 let details = taskCard.querySelector(".task-details");
-                if (details) details.style.display = "none"; 
+                if (details) details.style.display = "none";
 
                 let completeButton = taskCard.querySelector(".complete-task-btn");
-                if (completeButton) completeButton.remove(); 
+                if (completeButton) completeButton.remove();
 
                 let doneBadge = document.createElement("span");
                 doneBadge.className = "completed-text";
@@ -172,9 +189,9 @@ async function completeTask(taskId, event) {
  */
 async function fetchTasks() {
     try {
-        const response = await fetch("/api/tasks/",{
+        const response = await fetch("/api/tasks/", {
             method: "GET",
-            headers:{
+            headers: {
                 "Authorization": "Bearer " + localStorage.getItem("token")
             }
         });
@@ -186,43 +203,133 @@ async function fetchTasks() {
     }
 }
 
-/**
- * 更新任务面板
- */
 function updateTaskBoard(tasks) {
-    const taskList = document.querySelector(".task-list");
-    taskList.innerHTML = ""; 
+    const activeTasksContainer = document.querySelector(".task-list");
+    const completedTasksContainer = document.querySelector(".completed-task-list");
+
+    activeTasksContainer.innerHTML = "";
+    completedTasksContainer.innerHTML = "";
+
+    let hasCompletedTasks = false;
 
     tasks.forEach(task => {
-        let taskElement = document.createElement("div");
-        taskElement.className = `task-card ${task.is_completed ? "completed" : ""}`;
-        taskElement.id = `task-${task.id}`;
+        console.log("Task ID:", task.id, "Completed:", task.is_completed);
 
-        taskElement.innerHTML = `
-            <div class="task-header">
-                <span class="difficulty-${task.difficulty}">
-                    ${["Easy", "Medium", "Hard"][task.difficulty - 1]}
-                </span>
-                ${task.is_completed ? `<span class="completed-text">✔️ Done</span>` : ""}
+        let taskHTML = `
+            <div class="task-card ${task.is_completed ? "completed" : ""}" id="task-${task.id}">
+                <div class="task-header">
+                    <span class="difficulty-${task.difficulty}">
+                        ${["Easy", "Medium", "Hard"][task.difficulty - 1]}
+                    </span>
+                    ${task.is_completed ? `<span class="completed-text">✔️ Done</span>` : ""}
+                </div>
                 <p class="task-title">${task.title}</p>
+
+                <div class="task-details">
+                    ${task.start_date ? `<p class="task-start">🕒 Start: ${formatDate(task.start_date)}</p>` : ""}
+                    ${task.due_date ? `<p class="task-due">⏳ Due: ${formatDate(task.due_date)}</p>` : ""}
+                    ${task.tags && task.tags.trim() ? `<p class="task-tags">🏷️ Tags: ${task.tags.split(",").map(tag => `<span class="tag">#${tag.trim()}</span>`).join(" ")}</p>` : ""}
+                    ${task.checklist && task.checklist.trim() ? `<p class="task-checklist">✅ Checklist:<br><ul>${task.checklist.split("\n").map(item => `<li>✅ ${item.trim()}</li>`).join("")}</ul></p>` : ""}
+                    ${task.notes && task.notes.trim() ? `<p class="task-notes">📝 Notes:<br> ${task.notes}</p>` : ""}
+                </div>
+
+                ${!task.is_completed ? `<button class="pixel-btn complete-task-btn" data-task-id="${task.id}">✅ Complete</button>` : ""}
             </div>
-            <div class="task-details" style="display: ${task.is_completed ? 'none' : 'block'};">
-                ${task.start_date ? `<p class="task-start">🚀 Start: <span>${formatDate(task.start_date)}</span></p>` : ""}
-                ${task.due_date ? `<p class="task-due">⏳ Due: <span>${formatDate(task.due_date)}</span></p>` : ""}
-            </div>
-            ${!task.is_completed ? `<button class="pixel-btn complete-task-btn" data-task-id="${task.id}">✅ Complete</button>` : ""}
         `;
 
-        taskList.appendChild(taskElement);
+        if (task.is_completed) {
+            completedTasksContainer.innerHTML += taskHTML;
+            hasCompletedTasks = true;
+        } else {
+            activeTasksContainer.innerHTML += taskHTML;
+        }
     });
+
+    if (!hasCompletedTasks) {
+        completedTasksContainer.innerHTML = "<p>No completed tasks yet ✅</p>";
+    }
 }
 
+
+// function updateTaskBoard(tasks) {
+//     const taskList = document.querySelector(".task-list");
+//     taskList.innerHTML = "";
+
+//     tasks.forEach(task => {
+//         let taskElement = document.createElement("div");
+//         taskElement.className = `task-card ${task.is_completed ? "completed" : ""}`;
+//         taskElement.id = `task-${task.id}`;
+
+//         // 构建任务详情
+//         let taskHTML = `
+//             <div class="task-header">
+//                 <span class="difficulty-${task.difficulty}">
+//                     ${["Easy", "Medium", "Hard"][task.difficulty - 1]}
+//                 </span>
+//                 ${task.is_completed ? `<span class="completed-text">✔️ Done</span>` : ""}
+//                 <p class="task-title">${task.title}</p>
+//             </div>
+//             <div class="task-details" style="display: ${task.is_completed ? 'none' : 'block'};">
+//                 ${task.start_date ? `<p class="task-start">🚀 Start: <span>${formatDate(task.start_date)}</span></p>` : ""}
+//                 ${task.due_date ? `<p class="task-due">⏳ Due: <span>${formatDate(task.due_date)}</span></p>` : ""}
+//         `;
+
+//         // **渲染 Tags（如果有的话）**
+//         if (task.tags && task.tags.trim() !== "") {
+//             let tagsHTML = task.tags.split(",").map(tag => `#${tag.trim()}`).join(" ");
+//             taskHTML += `<p class="task-tags">🏷️ Tags: ${tagsHTML}</p>`;
+//         }
+
+//         // **渲染 Checklist（如果有的话）**
+//         if (task.checklist && task.checklist.trim() !== "") {
+//             let checklistHTML = task.checklist.split("\n").map(item => `✅ ${item.trim()}`).join("<br>");
+//             taskHTML += `<p class="task-checklist">✅ Checklist:<br>${checklistHTML}</p>`;
+//         }
+
+//         // **渲染 Notes（如果有的话）**
+//         if (task.notes && task.notes.trim() !== "") {
+//             taskHTML += `<p class="task-notes">📝 Notes:<br>${task.notes}</p>`;
+//         }
+
+//         taskHTML += `</div>`;  // 关闭 `task-details`
+
+//         // **渲染 "Complete" 按钮**
+//         if (!task.is_completed) {
+//             taskHTML += `<button class="pixel-btn complete-task-btn" data-task-id="${task.id}">✅ Complete</button>`;
+//         }
+
+//         taskElement.innerHTML = taskHTML;
+//         taskList.appendChild(taskElement);
+//     });
+
+//     taskList.innerHTML = `
+//     <div id="active-tasks">
+//         ${activeTasksHTML || "<p>No active tasks 🎯</p>"}
+//     </div>
+//     <button class="pixel-btn toggle-completed-btn" onclick="toggleCompletedTasks()">📂 Show Completed Tasks</button>
+//     <div id="completed-tasks" style="display: none;">
+//         ${completedTasksHTML || "<p>No completed tasks yet ✅</p>"}
+//     </div>
+// `;
+// }
+function toggleCompletedTasks() {
+    var completedTasks = document.getElementById("completed-tasks");
+    var btn = document.querySelector(".toggle-completed-btn");
+
+    if (completedTasks.style.display === "none") {
+        completedTasks.style.display = "block";
+        btn.textContent = "📂 Hide Completed Tasks";
+    } else {
+        completedTasks.style.display = "none";
+        btn.textContent = "📂 Show Completed Tasks";
+    }
+}
 /**
  * 更新任务地图
  */
 function updateTaskMap(tasks) {
     const map = document.querySelector(".pixel-map");
-    map.innerHTML = ""; 
+    map.innerHTML = "";
 
     tasks.forEach(task => {
         let mapTile = document.createElement("div");

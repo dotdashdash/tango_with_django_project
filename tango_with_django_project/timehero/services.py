@@ -49,7 +49,7 @@ def evaluate_difficulty(title, start_date, due_date, priority):
     """
     keywords_hard = ["report", "study", "presentation", "deadline", "research"]
     keywords_medium = ["exercise", "meeting", "cleaning", "shopping"]
-
+    
     difficulty = 1  # 默认难度为 Easy
 
     # 计算任务持续时间（分钟）
@@ -110,3 +110,31 @@ def complete_task(task):
 
     user.save()
     return unlocked_features  # 返回解锁的新功能列表
+def check_level_up(user):
+    """
+    玩家升级逻辑：
+    - 每升一级需要 level * 100 经验值
+    - 每次升级回复 1 点 HP（最多 5）
+    - 根据等级解锁新功能
+    """
+    if user.exp >= user.level * 100:
+        user.exp -= user.level * 100
+        user.level += 1
+        user.hp = min(user.hp + 1, 5)  # HP 上限 5
+
+        unlocked_feature = LEVEL_REWARDS.get(user.level, None)
+        user.save()
+        return unlocked_feature  # 如果解锁了新功能，返回它
+    return None
+def process_tasks_for_dashboard(tasks):
+    """
+    处理任务数据，确保 tags、checklist 以列表形式返回，避免 Django 模板 split 过滤器问题
+    """
+    for task in tasks:
+        # 去掉多余空格，确保 tags、checklist 是干净的列表
+        task.tags_list = [tag.strip() for tag in task.tags.split(",")] if task.tags else []
+        task.checklist_items = [item.strip() for item in task.checklist.split("\n")] if task.checklist else []
+        task.notes_content = task.notes.strip() if task.notes else ""
+
+    return tasks
+

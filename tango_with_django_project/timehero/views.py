@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from .models import *
 from .serializers import *
 from .services import evaluate_difficulty, complete_task, to_next_level, cap_by_level, MAX_STAT_POINTS, MAX_HEALTH
+from .services import evaluate_difficulty,complete_task,process_tasks_for_dashboard
 from .signals import *
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
@@ -16,7 +17,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-from django.http import JsonResponse
 
 def index(request):
     return render(request, 'index.html')
@@ -40,6 +40,8 @@ class PixelLoginView(LoginView):
     
 @login_required  # 确保用户必须登录才能访问
 def dashboard_view(request):
+    tasks = Task.objects.filter(user=request.user)  # 获取当前用户的任务
+    tasks = process_tasks_for_dashboard(tasks)
     return render(request, "dashboard.html")
 
 class PixelLogoutView(LogoutView):
@@ -63,7 +65,12 @@ class TaskViewSet(viewsets.ModelViewSet):
         start_date = self.request.data.get("start_date", timezone.now())  # 默认当前时间
         due_date = self.request.data.get("due_date", None)
 
-        task = serializer.save(user=user, start_date=start_date, due_date=due_date, priority=priority)
+        tags = self.request.data.get("tags", "").strip()  # 获取 tags
+        checklist = self.request.data.get("checklist", "").strip()  # 获取 checklist
+        notes = self.request.data.get("notes", "").strip()  # 获取 notes
+
+
+        task = serializer.save(user=user, start_date=start_date, due_date=due_date, priority=priority,tags=tags,checklist=checklist,notes=notes)
         task.difficulty = evaluate_difficulty(task.title, start_date, due_date, priority)
         task.save()
 
@@ -110,7 +117,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     def profile(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 def check_username(request):
     username = request.GET.get('value', None)
     if username and User.objects.filter(username=username).exists():
@@ -122,4 +129,3 @@ def check_email(request):
     if email and User.objects.filter(email=email).exists():
         return JsonResponse({'available': False})
     return JsonResponse({'available': True})
-    

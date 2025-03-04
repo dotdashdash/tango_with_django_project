@@ -59,6 +59,10 @@ class Task(models.Model):
     due_date = models.DateTimeField(null=True, blank=True)
     position_x = models.IntegerField(null=True, blank=True)
     position_y = models.IntegerField(null=True, blank=True)
+    tags = models.CharField(max_length=255, blank=True, null=True)  # 用逗号分隔的标签
+    checklist = models.TextField(blank=True, null=True)  # 任务清单，每行一个项目
+    notes = models.TextField(blank=True, null=True) 
+
 
     def complete_task(self):
         """ 任务完成后，更新状态并检查升级 """
