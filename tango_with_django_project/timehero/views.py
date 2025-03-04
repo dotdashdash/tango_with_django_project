@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
-from .services import evaluate_difficulty,complete_task
+from .services import evaluate_difficulty,complete_task,process_tasks_for_dashboard
 from .signals import *
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
@@ -39,6 +39,8 @@ class PixelLoginView(LoginView):
     
 @login_required  # 确保用户必须登录才能访问
 def dashboard_view(request):
+    tasks = Task.objects.filter(user=request.user)  # 获取当前用户的任务
+    tasks = process_tasks_for_dashboard(tasks) 
     return render(request, "dashboard.html")
 
 class PixelLogoutView(LogoutView):
@@ -61,8 +63,13 @@ class TaskViewSet(viewsets.ModelViewSet):
         priority = self.request.data.get("priority", "false").lower() == "true"
         start_date = self.request.data.get("start_date", timezone.now())  # 默认当前时间
         due_date = self.request.data.get("due_date", None)
+        
+        tags = self.request.data.get("tags", "").strip()  # 获取 tags
+        checklist = self.request.data.get("checklist", "").strip()  # 获取 checklist
+        notes = self.request.data.get("notes", "").strip()  # 获取 notes
 
-        task = serializer.save(user=user, start_date=start_date, due_date=due_date, priority=priority)
+
+        task = serializer.save(user=user, start_date=start_date, due_date=due_date, priority=priority,tags=tags,checklist=checklist,notes=notes)
         task.difficulty = evaluate_difficulty(task.title, start_date, due_date, priority)
         task.save()
 

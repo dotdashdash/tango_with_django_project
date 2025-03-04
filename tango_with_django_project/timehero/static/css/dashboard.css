@@ -22,27 +22,34 @@ body {
     box-sizing: border-box;
     overflow: hidden;
 }
+
 .status-item {
     display: flex;
     align-items: center;
     gap: 8px;
-  }
+}
+
 /* 避免 `pixel.css` 影响 dashboard 按钮 */
 .pixel-btn {
     font-size: 14px;
     padding: 12px;
 }
+
 .main-content {
     display: flex;
-    flex: 1;  /* 占满剩余空间 */
+    flex: 1;
+    /* 占满剩余空间 */
     padding: 20px;
-    gap: 20px; /* 任务面板和地图之间的间距 */
-    overflow: auto; /* 防止内容溢出 */
+    gap: 20px;
+    /* 任务面板和地图之间的间距 */
+    overflow: auto;
+    /* 防止内容溢出 */
 }
 
 /* 任务面板 - 靠左 */
 .task-board {
-    width: 40%;  /* 让任务面板占 40% */
+    width: 40%;
+    /* 让任务面板占 40% */
     max-width: 500px;
     background: #333;
     padding: 15px;
@@ -51,7 +58,8 @@ body {
 
 /* 任务地图 - 靠右 */
 .pixel-map {
-    flex: 1;  /* 让地图自动扩展 */
+    flex: 1;
+    /* 让地图自动扩展 */
     background: #444;
     padding: 15px;
     border-radius: 8px;
@@ -60,24 +68,30 @@ body {
 /* 适配移动端：竖排布局 */
 @media screen and (max-width: 768px) {
     .main-content {
-        flex-direction: column; /* 任务面板和地图在小屏幕上垂直排列 */
+        flex-direction: column;
+        /* 任务面板和地图在小屏幕上垂直排列 */
     }
 
-    .task-board, .pixel-map {
-        width: 100%; /* 在小屏幕上都占满 */
+    .task-board,
+    .pixel-map {
+        width: 100%;
+        /* 在小屏幕上都占满 */
         max-width: none;
     }
 }
+
 /* 模态框 (Modal) */
 .modal {
-    display: none; /* 默认隐藏 */
+    display: none;
+    /* 默认隐藏 */
     position: fixed;
     z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* 半透明黑色背景 */
+    background-color: rgba(0, 0, 0, 0.7);
+    /* 半透明黑色背景 */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -88,7 +102,7 @@ body {
     background-color: #222;
     padding: 20px;
     border-radius: 10px;
-    width: 400px;
+    width: 420px;
     max-width: 90%;
     box-shadow: 0px 0px 10px #8bc34a;
 }
@@ -105,12 +119,26 @@ body {
     color: red;
 }
 
+/* 让输入项独占一行 */
+.modal label {
+    /* display: block;  强制 label 独占一行 */
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.tags-container {
+    display: flex;
+    flex-direction: column;
+}
+
 /* 输入框 */
 .modal input[type="text"],
-.modal input[type="datetime-local"] {
+.modal input[type="datetime-local"],
+.modal select,
+.modal textarea {
     width: 100%;
     padding: 8px;
-    margin: 5px 0;
+    margin: 5px 0 10px;
     border: none;
     border-radius: 5px;
     background: #333;
@@ -133,6 +161,7 @@ body {
 .modal .pixel-btn:hover {
     background-color: #6f9a36;
 }
+
 /* .logout-btn {
    
     top: 10px;
@@ -152,3 +181,139 @@ body {
 .logout-btn:hover {
     background: #45a049;
 } */
+.task-card {
+    
+    background: #222;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.2);
+    margin-bottom: 15px;
+    font-size: 18px;
+    /* ✅ 增大字体 */
+    line-height: 1.6;
+    /* ✅ 增大行距 */
+    border: 2px solid #8bc34a;
+    /* ✅ 绿色边框 */
+}
+
+.task-title {
+    font-size: 22px;
+    /* ✅ 增大标题字体 */
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+/* 难度标签 */
+.task-header .difficulty-Easy {
+    color: #8bc34a;
+    font-weight: bold;
+}
+
+.task-header .difficulty-Medium {
+    color: #ffb74d;
+    font-weight: bold;
+}
+
+.task-header .difficulty-Hard {
+    color: #ff5252;
+    font-weight: bold;
+}
+
+.task-details {
+    background: #333;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+/* Start & Due 时间 */
+.task-start,
+.task-due {
+    font-size: 16px;
+    color: #e0e0e0;
+    font-weight: bold;
+}
+
+.task-tags {
+    font-size: 16px;
+    color: #8bc34a;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.task-tags .tag {
+    background: #444;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-right: 5px;
+    display: inline-block;
+    font-weight: bold;
+}
+
+.task-checklist {
+    font-size: 16px;
+    color: #ffeb3b;
+    margin-top: 10px;
+}
+
+.task-checklist ul {
+    padding-left: 20px;
+}
+
+.task-checklist li {
+    background: #555;
+    padding: 5px;
+    margin-top: 5px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.task-notes {
+    font-size: 16px;
+    color: #ffa726;
+    margin-top: 10px;
+    font-weight: bold;
+}
+.task-list-container {
+    margin-top: 20px;
+}
+
+.complete-task-btn,
+.toggle-completed-btn {
+    width: 90%; 
+    max-width: 300px; 
+    padding: 12px;
+    font-size: 18px;
+    background: #8bc34a;
+    color: black;
+    font-weight: bold;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    margin: 10px auto; 
+    box-shadow: 0px 4px 8px rgba(255, 255, 255, 0.2);
+}
+
+.complete-task-btn:hover {
+    background: #6f9a36;
+}
+
+.toggle-completed-btn:hover {
+    background: #5b7d2c;
+}
+
+.completed-task-list .task-card {
+    opacity: 0.7;
+    transform: scale(0.95);
+    transition: all 0.3s ease-in-out;
+}
+
+.completed-task-list .task-card:hover {
+    opacity: 1;
+    transform: scale(1);
+}

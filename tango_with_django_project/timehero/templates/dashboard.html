@@ -3,7 +3,9 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
+    <!-- 英国时间是utf多少？ -->
+    <meta charset="UTF-4">
+    <!-- <meta charset="UTF-8"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - TimeHero</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
@@ -37,42 +39,103 @@
     </div>
     <div class="main-content">
 
-        <!-- 任务面板 -->
         <div class="task-board">
             <h2 class="pixel-title">📋 Task Board</h2>
             <button class="pixel-btn" onclick="openTaskModal()">➕ New Task</button>
-            <div class="task-list">
-                {% for task in tasks %}
-                {% if task.user == request.user%}
-                <div class="task-card {% if task.is_completed %}completed{% endif %}" id="task-{{ task.id }}">
-                    <div class="task-header">
-                        <span class="difficulty-{{ task.difficulty }}">
-                            {{ task.get_difficulty_display }}
-                        </span>
-                        {% if not task.is_completed %}
-                        <button class="pixel-btn complete-task-btn" data-task-id="{{ task.id }}">
-                            ✅ Complete
-                        </button>
-                        {% else %}
-                        <span class="completed-text">✔️ Done</span>
-                        {% endif %}
-                    </div>
-                    <p class="task-title">{{ task.title }}</p>
 
-                    <!-- 任务详情部分，只有未完成的任务才显示 -->
-                    <div class="task-details" {% if task.is_completed %}style="display: none;" {% endif %}>
-                        {% if task.start_date %}
-                        <p class="task-time">🕒 Start: {{ task.start_date|date:"Y/m/d H:i" }}</p>
+            <div class="task-list-container">
+                <!-- 未完成任务 -->
+                <div id="active-tasks">
+                    <h3>📝 Active Tasks</h3>
+                    <div class="task-list">
+                        {% for task in tasks %}
+                        {% if task.user == request.user and not task.is_completed %}
+                        <div class="task-card" id="task-{{ task.id }}">
+                            <div class="task-header">
+                                <span class="difficulty-{{ task.difficulty }}">
+                                    {{ task.get_difficulty_display }}
+                                </span>
+                                <button class="complete-task-btn" data-task-id="{{ task.id }}">
+                                    ✅ Complete
+                                </button>
+                            </div>
+                            <p class="task-title">{{ task.title }}</p>
+
+                            <div class="task-details">
+                                {% if task.start_date %}
+                                <p class="task-time">🕒 Start: {{ task.start_date|date:"Y/m/d H:i" }}</p>
+                                {% endif %}
+                                {% if task.due_date %}
+                                <p class="task-due">⏳ Due: {{ task.due_date|date:"Y/m/d H:i" }}</p>
+                                {% endif %}
+                                {% if task.tags_list %}
+                                <p class="task-tags">🏷️ Tags:
+                                    {% for tag in task.tags_list %} #{{ tag }} {% endfor %}
+                                </p>
+                                {% endif %}
+                                {% if task.checklist_items %}
+                                <p class="task-checklist">✅ Checklist:<br>
+                                    {% for item in task.checklist_items %} ✅ {{ item }}<br> {% endfor %}
+                                </p>
+                                {% endif %}
+                                {% if task.notes_content %}
+                                <p class="task-notes">📝 Notes:<br> {{ task.notes_content }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
                         {% endif %}
-                        {% if task.due_date %}
-                        <p class="task-due">⏳ Due: {{ task.due_date|date:"Y/m/d H:i" }}</p>
-                        {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
-                {% endif %}
-                {% endfor %}
+
+                <!-- "已完成任务" 折叠按钮 -->
+                <button class="pixel-btn toggle-completed-btn" onclick="toggleCompletedTasks()">📂 Show Completed
+                    Tasks</button>
+
+                <!-- 已完成任务 -->
+                <div id="completed-tasks" style="display: none;">
+                    <h3>✅ Completed Tasks</h3>
+                    <div class="completed-task-list">
+                        {% for task in tasks %}
+                        {% if task.user == request.user and task.is_completed %}
+                        <div class="task-card completed" id="task-{{ task.id }}">
+                            <div class="task-header">
+                                <span class="difficulty-{{ task.difficulty }}">
+                                    {{ task.get_difficulty_display }}
+                                </span>
+                                <span class="completed-text">✔️ Done</span>
+                            </div>
+                            <p class="task-title">{{ task.title }}</p>
+
+                            <div class="task-details">
+                                {% if task.start_date %}
+                                <p class="task-time">🕒 Start: {{ task.start_date|date:"Y/m/d H:i" }}</p>
+                                {% endif %}
+                                {% if task.due_date %}
+                                <p class="task-due">⏳ Due: {{ task.due_date|date:"Y/m/d H:i" }}</p>
+                                {% endif %}
+                                {% if task.tags_list %}
+                                <p class="task-tags">🏷️ Tags:
+                                    {% for tag in task.tags_list %} #{{ tag }} {% endfor %}
+                                </p>
+                                {% endif %}
+                                {% if task.checklist_items %}
+                                <p class="task-checklist">✅ Checklist:<br>
+                                    {% for item in task.checklist_items %} ✅ {{ item }}<br> {% endfor %}
+                                </p>
+                                {% endif %}
+                                {% if task.notes_content %}
+                                <p class="task-notes">📝 Notes:<br> {{ task.notes_content }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         </div>
+
         <!-- 任务地图 -->
         <div class="pixel-map">
             {% for task in tasks %}
@@ -109,6 +172,16 @@
                 <span id="difficultyDisplay">Easy</span>
                 <input type="hidden" id="taskDifficulty" name="difficulty">
 
+                <div class="tags-container">
+                    <label>Tags:</label>
+                    <input type="text" id="taskTags" name="tags" placeholder="e.g. work, study, exercise">
+                </div>
+
+                <label>Checklist:</label>
+                <textarea id="taskChecklist" name="checklist" placeholder="e.g. task 1, task 2, task 3"></textarea>
+
+                <label>Notes:</label>
+                <textarea id="taskNotes" name="notes" placeholder="Additional notes..."></textarea>
                 <button type="submit" class="pixel-btn">Submit</button>
             </form>
         </div>

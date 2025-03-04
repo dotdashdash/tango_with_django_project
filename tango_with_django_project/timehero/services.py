@@ -83,3 +83,15 @@ def check_level_up(user):
         user.save()
         return unlocked_feature  # 如果解锁了新功能，返回它
     return None
+def process_tasks_for_dashboard(tasks):
+    """
+    处理任务数据，确保 tags、checklist 以列表形式返回，避免 Django 模板 split 过滤器问题
+    """
+    for task in tasks:
+        # 去掉多余空格，确保 tags、checklist 是干净的列表
+        task.tags_list = [tag.strip() for tag in task.tags.split(",")] if task.tags else []
+        task.checklist_items = [item.strip() for item in task.checklist.split("\n")] if task.checklist else []
+        task.notes_content = task.notes.strip() if task.notes else ""
+
+    return tasks
+

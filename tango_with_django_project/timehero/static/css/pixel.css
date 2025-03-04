@@ -40,7 +40,8 @@ header {
   background: transparent !important;
 }
 
-.pixel-btn {
+.pixel-btn,.complete-task-btn,
+.toggle-completed-btn {
   display: inline-block;
   margin: 10px;
   width: 100%;
@@ -203,24 +204,7 @@ header {
   border: 3px solid #4a4a4a;
 } */
 
-.task-card {
-  background: #222;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-left: 4px solid;
-}
 
-.difficulty-1 {
-  border-color: #8bc34a;
-}
-
-.difficulty-2 {
-  border-color: #ffc107;
-}
-
-.difficulty-3 {
-  border-color: #f44336;
-}
 
 /* 添加 CSS */
 .toast {
