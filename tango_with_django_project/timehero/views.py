@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
+from .services import evaluate_difficulty, complete_task, to_next_level, cap_by_level, MAX_STAT_POINTS, MAX_HEALTH
 from .services import evaluate_difficulty,complete_task,process_tasks_for_dashboard
 from .signals import *
 from django.shortcuts import render, redirect
@@ -40,7 +41,7 @@ class PixelLoginView(LoginView):
 @login_required  # 确保用户必须登录才能访问
 def dashboard_view(request):
     tasks = Task.objects.filter(user=request.user)  # 获取当前用户的任务
-    tasks = process_tasks_for_dashboard(tasks) 
+    tasks = process_tasks_for_dashboard(tasks)
     return render(request, "dashboard.html")
 
 class PixelLogoutView(LogoutView):
@@ -63,7 +64,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         priority = self.request.data.get("priority", "false").lower() == "true"
         start_date = self.request.data.get("start_date", timezone.now())  # 默认当前时间
         due_date = self.request.data.get("due_date", None)
-        
+
         tags = self.request.data.get("tags", "").strip()  # 获取 tags
         checklist = self.request.data.get("checklist", "").strip()  # 获取 checklist
         notes = self.request.data.get("notes", "").strip()  # 获取 notes
@@ -81,9 +82,28 @@ class TaskViewSet(viewsets.ModelViewSet):
         if not task.is_completed:
             task.is_completed = True
             task.save()
-            user=task.user
-            user.exp += task.difficulty * 10
+
+            user = task.user
+            user.exp += task.difficulty * 1000
+
+            # 升级逻辑
+            experience_to_next_level = to_next_level(user.level)
+            leveled_up = False
+
+            while user.exp >= experience_to_next_level:
+                user.exp -= experience_to_next_level
+                user.level = cap_by_level(user.level + 1)
+                leveled_up = True
+
+                experience_to_next_level = to_next_level(user.level)
+                user.hp = MAX_HEALTH
+
             user.save()
+
+            if leveled_up:
+                # 记录升级事件或发送通知
+                pass
+
         return Response({"status": "completed"})
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -97,3 +117,15 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     def profile(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+def check_username(request):
+    username = request.GET.get('value', None)
+    if username and User.objects.filter(username=username).exists():
+        return JsonResponse({'available': False})
+    return JsonResponse({'available': True})
+
+def check_email(request):
+    email = request.GET.get('value', None)
+    if email and User.objects.filter(email=email).exists():
+        return JsonResponse({'available': False})
+    return JsonResponse({'available': True})

@@ -1,6 +1,6 @@
 from datetime import datetime
-
 from django.apps import apps
+
 # 经验值奖励规则
 LEVEL_REWARDS = {
     2: "🌞 Daily Tasks Unlocked! Set tasks to repeat daily.",
@@ -12,6 +12,33 @@ LEVEL_REWARDS = {
     30: "🗺️ Adventure Mode Unlocked! Explore and find tasks in the world.",
     40: "⚔️ Boss Mode Unlocked! Special high-reward tasks appear.",
 }
+
+MAX_HEALTH = 5
+MAX_LEVEL = 100
+MAX_STAT_POINTS = MAX_LEVEL
+MAX_LEVEL_HARD_CAP = 9999
+
+def to_next_level(level):
+    """计算下一级所需的经验值"""
+    if level < 5:
+        return 25 * level
+    elif level == 5:
+        return 150
+    else:
+        return round(((level ** 2) * 0.25 + 10 * level + 139.75) / 10) * 10
+
+def cap_by_level(level):
+    """限制等级不超过最大等级"""
+    return min(level, MAX_LEVEL)
+
+# def auto_allocate(user):
+#     """自动分配属性点的逻辑"""
+#     points_to_allocate = user.stat_points
+#     user.strength += points_to_allocate // 4
+#     user.intelligence += points_to_allocate // 4
+#     user.constitution += points_to_allocate // 4
+#     user.perception += points_to_allocate // 4
+#     user.stat_points = 0
 
 def evaluate_difficulty(title, start_date, due_date, priority):
     """
@@ -51,6 +78,7 @@ def evaluate_difficulty(title, start_date, due_date, priority):
 
     return difficulty
 
+
 def complete_task(task):
     """
     任务完成后：
@@ -58,15 +86,30 @@ def complete_task(task):
     - 更新用户经验值
     - 检查用户是否升级
     """
-    Task=apps.get_model('timehero','Task')
+    Task = apps.get_model('timehero', 'Task')
     task.is_completed = True
     task.save()
 
     user = task.user
-    user.exp += task.difficulty * 10  # 经验值计算
-    unlocked_feature = check_level_up(user)  # 检查是否升级
-    return unlocked_feature  # 返回解锁的新功能（如果有）
+    user.exp += task.difficulty * 1000  # 经验值计算
+    unlocked_features = []
 
+    # 升级逻辑
+    experience_to_next_level = to_next_level(user.level)
+    while user.exp >= experience_to_next_level:
+        user.exp -= experience_to_next_level
+        user.level = min(user.level + 1, MAX_LEVEL_HARD_CAP)
+        user.hp = min(user.hp + 1, MAX_HEALTH)  # 升级时恢复生命值
+
+        # 检查是否解锁新功能
+        unlocked_feature = LEVEL_REWARDS.get(user.level)
+        if unlocked_feature:
+            unlocked_features.append(unlocked_feature)
+
+        experience_to_next_level = to_next_level(user.level)
+
+    user.save()
+    return unlocked_features  # 返回解锁的新功能列表
 def check_level_up(user):
     """
     玩家升级逻辑：
@@ -78,7 +121,7 @@ def check_level_up(user):
         user.exp -= user.level * 100
         user.level += 1
         user.hp = min(user.hp + 1, 5)  # HP 上限 5
-        
+
         unlocked_feature = LEVEL_REWARDS.get(user.level, None)
         user.save()
         return unlocked_feature  # 如果解锁了新功能，返回它

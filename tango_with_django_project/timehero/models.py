@@ -29,6 +29,7 @@ class User(AbstractUser):
                                     related_name="timehero_user_permissions",
                                     related_query_name="user",)
 
+
 # class Task(models.Model):
 #     DIFFICULTY_CHOICES = [
 #         (1, '⭐'), 

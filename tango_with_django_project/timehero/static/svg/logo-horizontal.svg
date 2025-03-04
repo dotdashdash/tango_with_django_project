@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="timehero-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 408 76">
+  <defs>
+    <style type="text/css"><![CDATA[
+      /* 像素风格字体引入 */
+      @font-face {
+        font-family: 'Press Start 2P';
+        src: url('https://fonts.gstatic.com/s/pressstart2p/v9/e3t4euO8T9Y2gFzZcF5vUq5R9Q.woff2') format('woff2');
+      }
+    ]]></style>
+  </defs>
+  <!-- 模仿原 SVG 中的彩色圆形（位置和颜色参考） -->
+  <circle cx="260.68" cy="13.42" r="6.04" fill="#ff6165"/>
+  <circle cx="314.92" cy="13.42" r="6.04" fill="#50b5e9"/>
+  <!-- 像素化的 TimeHero 文本 -->
+  <text x="20" y="60" fill="#fff" font-family="'Press Start 2P', monospace" font-size="48" style="shape-rendering: crispEdges; letter-spacing: 2px;">
+    TimeHero
+  </text>
+</svg>

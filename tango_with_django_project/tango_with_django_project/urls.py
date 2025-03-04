@@ -35,6 +35,7 @@ from timehero.views import *
 from django.conf import settings
 from django.conf.urls.static import static
 
+
 router = DefaultRouter()
 router.register(r'tasks', TaskViewSet,basename='task')
 router.register(r'users', UserViewSet)
@@ -48,6 +49,8 @@ urlpatterns = [
     path("dashboard/", dashboard_view, name="dashboard"),
     path('', index),
     path('api/', include(router.urls)),
+    path('api/check_username/', check_username, name='check_username'),
+    path('api/check_email/', check_email, name='check_email'),
     # path('api/profile/', UserViewSet.as_view({'get': 'profile'})),
     # path('create/', TaskViewSet.as_view({'post':'create'}), name="create_task"),
     
