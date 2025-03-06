@@ -1,4 +1,5 @@
 # views.py
+from django.http import JsonResponse
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -12,11 +13,12 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
 from .models import User
-from .forms import UserRegisterForm, UserLoginForm
+from .forms import UserRegisterForm, UserLoginForm,  EmailForm, SecurityQuestionForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from django.utils import timezone
 
 def index(request):
     return render(request, 'index.html')
@@ -124,8 +126,73 @@ def check_username(request):
         return JsonResponse({'available': False})
     return JsonResponse({'available': True})
 
-def check_email(request):
-    email = request.GET.get('value', None)
+def check_email_exists(email):
+    try:
+        user = User.objects.get(email=email)
+        return user
+    except User.DoesNotExist:
+        return None
+
+def password_reset_email_view(request):
+    if request.method == "POST":
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            user = check_email_exists(email)
+            if user:
+                request.session['reset_user_id'] = user.id
+                return redirect('password_reset_security_question')
+            else:
+                messages.error(request, "The email is not registered.")
+        else:
+            messages.error(request, "Please enter a valid email address.")
+    else:
+        form = EmailForm()
+    return render(request, "passwordreset_email.html", {"form": form})
+
+def password_reset_security_question_view(request):
+    user_id = request.session.get('reset_user_id')
+    if not user_id:
+        return redirect('password_reset_email')
+
+    user = get_object_or_404(User, id=user_id)
+
+    # 检查账号是否被锁定
+    if user.is_locked:
+        messages.error(request, "Your account is locked due to too many failed attempts. Please try again later.")
+        return redirect('login')
+
+    if request.method == "POST":
+        form = SecurityQuestionForm(request.POST)
+        if form.is_valid():
+            security_answer = form.cleaned_data['security_answer']
+            new_password = form.cleaned_data['new_password']
+
+            # 检查回答错误次数
+            if user.security_answer_attempts >= 3:
+                user.is_locked = True
+                user.save()
+                messages.error(request, "Your account is locked due to too many failed attempts. Please try again later.")
+                return redirect('login')
+
+            if user.security_answer == security_answer:
+                user.set_password(new_password)
+                user.security_answer_attempts = 0  # 重置错误次数
+                user.save()
+                messages.success(request, "Password Reset！")
+                return redirect('login')
+            else:
+                user.security_answer_attempts += 1
+                user.last_attempt_time = timezone.now()
+                user.save()
+                messages.error(request, "Incorrect answer。")
+    else:
+        form = SecurityQuestionForm()
+    return render(request, "passwordreset_security_question.html", {"form": form, "security_question": user.security_question})
+
+def ajax_check_email(request):
+    email = request.GET.get('email', None)
     if email and User.objects.filter(email=email).exists():
-        return JsonResponse({'available': False})
-    return JsonResponse({'available': True})
+        return JsonResponse({'exists': True})
+    return JsonResponse({'exists': False})
+
