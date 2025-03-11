@@ -31,10 +31,15 @@
 from django.urls import path, include
 from django.contrib import admin
 from rest_framework.routers import DefaultRouter
-from timehero.views import *
+
 from django.conf import settings
 from django.conf.urls.static import static
 
+from timehero.views import *
+
+from timehero.views import check_username,check_email_exists
+
+from timehero.views import password_reset_security_question_view
 
 router = DefaultRouter()
 router.register(r'tasks', TaskViewSet,basename='task')
@@ -51,7 +56,10 @@ urlpatterns = [
     path('', index),
     path('api/', include(router.urls)),
     path('api/check_username/', check_username, name='check_username'),
-    path('api/check_email/', check_email, name='check_email'),
+    path('api/check_email/', check_email_exists, name='check_email'),
+    path('password-reset/', password_reset_email_view, name='password_reset_email'),
+    path('password-reset/security-question/', password_reset_security_question_view, name='password_reset_security_question'),
+    path('api/ajax_check_email/', ajax_check_email, name='ajax_check_email'),
     path("api/user/achievements/", user_achievements_view, name="user_achievements"),
     # path("achievements/", achievement_list, name="achievement-list"),
     # path('api/profile/', UserViewSet.as_view({'get': 'profile'})),

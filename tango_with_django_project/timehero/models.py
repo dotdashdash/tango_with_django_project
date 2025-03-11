@@ -28,6 +28,26 @@ class User(AbstractUser):
                                     help_text='Specific permissions for this user.',
                                     related_name="timehero_user_permissions",
                                     related_query_name="user",)
+    security_question = models.CharField(max_length=255, blank=True)
+    security_answer = models.CharField(max_length=255, blank=True)
+    email = models.EmailField(unique=True)
+    security_answer_attempts = models.IntegerField(default=0)
+    is_locked = models.BooleanField(default=False)
+    last_attempt_time = models.DateTimeField(null=True, blank=True)
+
+    def reset_password(self, email, new_password, security_answer):
+        try:
+            user = User.objects.get(email=email)
+            if user.security_answer == security_answer:
+                user.set_password(new_password)
+                user.save()
+                return True
+        except User.DoesNotExist:
+            pass
+        return False
+
+    def get_security_question(self):
+        return self.security_question
 
 
 # class Task(models.Model):
@@ -59,10 +79,6 @@ class Task(models.Model):
     due_date = models.DateTimeField(null=True, blank=True)
     position_x = models.IntegerField(null=True, blank=True)
     position_y = models.IntegerField(null=True, blank=True)
-    tags = models.CharField(max_length=255, blank=True, null=True)  # 用逗号分隔的标签
-    checklist = models.TextField(blank=True, null=True)  # 任务清单，每行一个项目
-    notes = models.TextField(blank=True, null=True) 
-
 
     def complete_task(self):
         """ 任务完成后，更新状态并检查升级 """
