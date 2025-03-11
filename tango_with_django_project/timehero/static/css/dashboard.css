@@ -1,4 +1,4 @@
-/* 让 `dashboard.html` 保持原样 */
+/* 🎨 全局样式 */
 body {
     display: block;
     background: #1a1a1a;
@@ -9,6 +9,7 @@ body {
     padding: 0;
 }
 
+/* 📌 顶部状态栏 */
 .status-bar {
     display: flex;
     justify-content: space-between;
@@ -17,7 +18,6 @@ body {
     padding: 10px 20px;
     font-size: 16px;
     width: 100%;
-    /* max-width: 100vw; */
     border-bottom: 2px solid #444;
     box-sizing: border-box;
     overflow: hidden;
@@ -29,33 +29,31 @@ body {
     gap: 8px;
 }
 
-/* 避免 `pixel.css` 影响 dashboard 按钮 */
-.pixel-btn {
-    font-size: 14px;
-    padding: 12px;
-}
-
+/* 🏗️ 主要内容区域布局 */
 .main-content {
     display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     flex: 1;
-    /* 占满剩余空间 */
     padding: 20px;
     gap: 20px;
-    /* 任务面板和地图之间的间距 */
     overflow: auto;
-    /* 防止内容溢出 */
 }
 
-/* 任务面板 - 靠左 */
-.task-board {
-    width: 40%;
-    /* 让任务面板占 40% */
-    max-width: 500px;
-    background: #333;
-    padding: 15px;
-    border-radius: 8px;
+#task-board, #leaderboard-container {
+    flex: 1;
+    padding: 20px;
+    background: #2d2d2d;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    min-height: 400px; /* 保持高度一致 */
 }
 
+/* 让排行榜中的项目左对齐 */
+.leaderboard {
+    list-style: none;
+    padding-left: 0;
+}
 /* 任务地图 - 靠右 */
 .pixel-map {
     flex: 1;
@@ -162,25 +160,6 @@ body {
     background-color: #6f9a36;
 }
 
-/* .logout-btn {
-   
-    top: 10px;
-    left: 10px;
-    background: #4CAF50;
-    color: white;
-    padding: 6px 10px;
-    font-size: 10px;
-    text-align: center;
-    text-decoration: none;
-    border: 2px solid black;
-    cursor: pointer;
-    text-transform: uppercase;
-    box-shadow: 2px 2px 0 black;
-}
-
-.logout-btn:hover {
-    background: #45a049;
-} */
 .task-card {
 
     background: #222;
@@ -280,20 +259,17 @@ body {
     margin-top: 20px;
 }
 
-.complete-task-btn,
-.toggle-completed-btn {
+/* ✅ 任务操作按钮 */
+.complete-task-btn, .toggle-completed-btn {
     width: 90%;
     max-width: 300px;
     padding: 12px;
-    font-size: 10px;
-    /* background: #8bc34a;
-    color: black; */
+    font-size: 14px;
     color: white;
     background-color: #4CAF50;
     border: 2px solid #fff;
     font-weight: bold;
     border-radius: 8px;
-    /* border: none; */
     cursor: pointer;
     text-align: center;
     display: flex;
@@ -303,14 +279,11 @@ body {
     box-shadow: 0px 4px 8px rgba(255, 255, 255, 0.2);
 }
 
-.complete-task-btn:hover {
+.complete-task-btn:hover, .toggle-completed-btn:hover {
     background: #6f9a36;
 }
 
-.toggle-completed-btn:hover {
-    background: #5b7d2c;
-}
-
+/* ✅ 完成任务效果 */
 .completed-task-list .task-card {
     opacity: 0.7;
     transform: scale(0.95);
@@ -320,4 +293,64 @@ body {
 .completed-task-list .task-card:hover {
     opacity: 1;
     transform: scale(1);
+}
+
+/* 🎖️ 成就系统 */
+/* ✅ 成就弹出效果 */
+/* ✅ 让 Leaderboard 右下角放置按钮 */
+/* .leaderboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+} */
+
+.achievements-button {
+    align-self: flex-end;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* ✅ 让成就展示在右下角 */
+.achievements-popup-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+/* ✅ 成就弹出框样式 */
+.achievement-toast {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0px 4px 8px rgba(255, 255, 255, 0.3);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.achievement-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ✅ 成就历史列表 */
+.achievements-list-container {
+    display: none;  /* 默认隐藏 */
+    background: #111;
+    padding: 15px;
+    border-radius: 10px;
+    max-height: 200px;
+    overflow-y: auto;
 }

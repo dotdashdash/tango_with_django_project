@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
+
 </head>
 
 <body>
@@ -22,7 +23,7 @@
     <div class="status-bar">
         <div class="status-item">
             <img src="{% static 'sprites/hero.png' %}" class="pixel-icon">
-            <span>Lv.{{ user.level }}</span> | <span>{{ user.username }}</span>
+            <span id="level">Lv.{{ user.level }}</span> | <span>{{ user.username }}</span>
         </div>
         <div class="status-item">
             ❤️ <span id="hp">{{ user.hp }}</span>/5
@@ -39,9 +40,9 @@
             </form>
         </div>
     </div>
-    <div class="main-content">
+    <div class="main-content flex">
 
-        <div class="task-board">
+        <div class="task-board" id="task-board">
             <h2 class="pixel-title">📋 Task Board</h2>
             <button class="pixel-btn" onclick="openTaskModal()">➕ New Task</button>
 
@@ -91,7 +92,7 @@
                 </div>
 
                 <!-- "已完成任务" 折叠按钮 -->
-                <button class="toggle-completed-btn" onclick="toggleCompletedTasks()">Show Completed
+                <button class="pixel-btn toggle-completed-btn" onclick="toggleCompletedTasks()">📂 Show Completed
                     Tasks</button>
 
                 <!-- 已完成任务 -->
@@ -137,16 +138,29 @@
                 </div>
             </div>
         </div>
+        <div id="leaderboard-container" class="task-board">
+            <h2 class="pixel-title">🏆 Leaderboard</h2>
+            <ul class="leaderboard">
+                <ul>
+                    <li>1. User A - 500 XP</li>
+                    <li>2. User B - 450 XP</li>
+                    <li>3. User C - 400 XP</li>
+                </ul>
 
-        <!-- 任务地图 -->
-        <div class="pixel-map">
-            {% for task in tasks %}
-            <div class="map-tile {% if task.is_completed %}completed{% endif %}" data-task-id="{{ task.id }}"
-                data-position-x="{{ task.position_x }}" data-position-y="{{ task.position_y }}">
-                {% if task.difficulty == 3 %}🔥{% else %}📜{% endif %}
-            </div>
-            {% endfor %}
+
+                <!-- “查看全部成就” 按钮，放在 Leaderboard 右下角 -->
+                <button class="achievements-button">查看全部成就</button>
         </div>
+
+        <!-- 右下角成就展示区域 -->
+        <div class="achievements-popup-container">
+            <div class="achievements-popup"></div>
+            <div class="achievements-list-container">
+                <div class="achievements-list"></div>
+            </div>
+        </div>
+
+
 
     </div>
 
@@ -196,6 +210,8 @@
         flatpickr("#taskStartDate", { enableTime: true, dateFormat: "Y-m-d H:i", locale: "en" });
         flatpickr("#taskDueDate", { enableTime: true, dateFormat: "Y-m-d H:i", locale: "en" });
     </script>
+
+
 </body>
 
 </html>

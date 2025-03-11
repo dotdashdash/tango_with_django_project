@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
-from .services import evaluate_difficulty,complete_task,process_tasks_for_dashboard
+from .services import evaluate_difficulty,complete_task,process_tasks_for_dashboard,check_level_up,get_user_achievements
 from .signals import *
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
@@ -16,7 +16,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-
+from django.http import JsonResponse    
 def index(request):
     return render(request, 'index.html')
 def register_view(request):
@@ -73,18 +73,20 @@ class TaskViewSet(viewsets.ModelViewSet):
         task.difficulty = evaluate_difficulty(task.title, start_date, due_date, priority)
         task.save()
 
-
     @action(detail=True, methods=['post'])
     def complete(self, request, pk=None):
         """ 完成任务后计算经验值，并检查是否升级 """
         task = self.get_object()
-        if not task.is_completed:
-            task.is_completed = True
-            task.save()
-            user=task.user
-            user.exp += task.difficulty * 10
-            user.save()
-        return Response({"status": "completed"})
+
+        if task.is_completed:
+            return Response({"status": "already completed"}, status=400)
+
+        # ✅ 调用 `services.py` 里的 `complete_task`
+        result = complete_task(task)
+
+        # ✅ 确保 `Response` 直接返回 `result`
+        return Response(result)  
+
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
@@ -97,3 +99,13 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     def profile(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+def user_achievements_view(request):
+    """ 返回 JSON 而不是模板 """
+    user = request.user
+    if not user.is_authenticated:
+        # 若要阻止匿名用户，直接返回空或 401
+        return JsonResponse({"achievements": []}, status=200)
+
+    achievements = get_user_achievements(user)
+    return JsonResponse({"achievements": achievements}, status=200)

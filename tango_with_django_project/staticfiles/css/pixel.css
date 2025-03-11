@@ -42,9 +42,9 @@ header {
 
 .pixel-btn,.complete-task-btn,
 .toggle-completed-btn {
-  display: inline-block;
-  margin: 10px;
-  width: 100%;
+  display: block;
+  margin: 10px auto;
+  /* width: 100%; */
   text-decoration: none;
   text-align: center;
   /* background: #8bc34a; */
@@ -153,7 +153,7 @@ header {
 }
 
 /* 地图视图 */
-.pixel-map {
+/* .pixel-map {
   display: grid;
   grid-template-columns: repeat(10, 32px);
   grid-template-rows: repeat(10, 32px);
@@ -176,7 +176,38 @@ header {
 
 .map-tile:hover {
   background: #444;
+} */
+/* ✅ 让 pixel-map 变成一个 `flexbox` 容器 */
+.pixel-map {
+  display: flex;
+  flex-direction: column; /* 垂直排列 */
+  gap: 10px; /* 让每个成就文本框之间有间距 */
+  padding: 10px;
+  max-width: 80%; /* 限制最大宽度 */
+  margin: auto; /* 居中显示 */
 }
+
+/* ✅ 成就文本框样式 */
+.map-tile.achievement {
+  background: rgba(0, 0, 0, 0.8); /* 半透明黑色背景 */
+  color: #fff; /* 白色文字 */
+  padding: 10px 15px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  opacity: 0; /* 初始隐藏 */
+  transform: translateY(10px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+/* ✅ 当动画生效时，让它渐入 */
+.map-tile.achievement.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 
 .player-avatar {
   font-size: 24px;

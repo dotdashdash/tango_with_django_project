@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
             completeTask(taskId, event);
         }
     });
-    document.querySelector(".toggle-completed-btn").addEventListener("click", toggleCompletedTasks);
+
 });
 
 function showToast(message, duration = 3000) {
@@ -22,13 +22,6 @@ function showToast(message, duration = 3000) {
     setTimeout(() => toast.remove(), duration);
 }
 
-/**
- * 显示/隐藏任务创建表单
- */
-// function toggleTaskModal() {
-//     let modal = document.getElementById("taskModal");
-//     modal.style.display = (modal.style.display === "none" || modal.style.display === "") ? "block" : "none";
-// }
 // 打开任务创建模态框
 function openTaskModal() {
     document.getElementById("taskModal").style.display = "flex";
@@ -159,6 +152,7 @@ async function completeTask(taskId, event) {
         });
 
         if (response.ok) {
+            const data = await response.json();
             let taskCard = document.getElementById(`task-${taskId}`);
             if (taskCard) {
                 let details = taskCard.querySelector(".task-details");
@@ -176,6 +170,12 @@ async function completeTask(taskId, event) {
             if (event) createParticles(event.clientX, event.clientY);
             if (data.exp !== undefined) {
                 document.getElementById("exp").textContent = data.exp;
+            }
+            if (data.level !== undefined) {
+                document.getElementById("level").textContent = data.level;
+            }
+            if (Array.isArray(data.all_achievements) && data.all_achievements.length > 0) {
+                updateTaskMap(data.all_achievements);  // ✅ 改用 `all_achievements`
             }
         } else {
             console.error("Task completion failed");
@@ -198,7 +198,7 @@ async function fetchTasks() {
         });
         const tasks = await response.json();
         updateTaskBoard(tasks);
-        updateTaskMap(tasks);
+        // updateTaskMap(tasks);
     } catch (error) {
         console.error("fetch failed", error);
     }
@@ -251,104 +251,138 @@ function updateTaskBoard(tasks) {
     }
 }
 
-
-// function updateTaskBoard(tasks) {
-//     const taskList = document.querySelector(".task-list");
-//     taskList.innerHTML = "";
-
-//     tasks.forEach(task => {
-//         let taskElement = document.createElement("div");
-//         taskElement.className = `task-card ${task.is_completed ? "completed" : ""}`;
-//         taskElement.id = `task-${task.id}`;
-
-//         // 构建任务详情
-//         let taskHTML = `
-//             <div class="task-header">
-//                 <span class="difficulty-${task.difficulty}">
-//                     ${["Easy", "Medium", "Hard"][task.difficulty - 1]}
-//                 </span>
-//                 ${task.is_completed ? `<span class="completed-text">✔️ Done</span>` : ""}
-//                 <p class="task-title">${task.title}</p>
-//             </div>
-//             <div class="task-details" style="display: ${task.is_completed ? 'none' : 'block'};">
-//                 ${task.start_date ? `<p class="task-start">🚀 Start: <span>${formatDate(task.start_date)}</span></p>` : ""}
-//                 ${task.due_date ? `<p class="task-due">⏳ Due: <span>${formatDate(task.due_date)}</span></p>` : ""}
-//         `;
-
-//         // **渲染 Tags（如果有的话）**
-//         if (task.tags && task.tags.trim() !== "") {
-//             let tagsHTML = task.tags.split(",").map(tag => `#${tag.trim()}`).join(" ");
-//             taskHTML += `<p class="task-tags">🏷️ Tags: ${tagsHTML}</p>`;
-//         }
-
-//         // **渲染 Checklist（如果有的话）**
-//         if (task.checklist && task.checklist.trim() !== "") {
-//             let checklistHTML = task.checklist.split("\n").map(item => `✅ ${item.trim()}`).join("<br>");
-//             taskHTML += `<p class="task-checklist">✅ Checklist:<br>${checklistHTML}</p>`;
-//         }
-
-//         // **渲染 Notes（如果有的话）**
-//         if (task.notes && task.notes.trim() !== "") {
-//             taskHTML += `<p class="task-notes">📝 Notes:<br>${task.notes}</p>`;
-//         }
-
-//         taskHTML += `</div>`;  // 关闭 `task-details`
-
-//         // **渲染 "Complete" 按钮**
-//         if (!task.is_completed) {
-//             taskHTML += `<button class="pixel-btn complete-task-btn" data-task-id="${task.id}">✅ Complete</button>`;
-//         }
-
-//         taskElement.innerHTML = taskHTML;
-//         taskList.appendChild(taskElement);
-//     });
-
-//     taskList.innerHTML = `
-//     <div id="active-tasks">
-//         ${activeTasksHTML || "<p>No active tasks 🎯</p>"}
-//     </div>
-//     <button class="pixel-btn toggle-completed-btn" onclick="toggleCompletedTasks()">📂 Show Completed Tasks</button>
-//     <div id="completed-tasks" style="display: none;">
-//         ${completedTasksHTML || "<p>No completed tasks yet ✅</p>"}
-//     </div>
-// `;
-// }
 function toggleCompletedTasks() {
-    let completedTaskSection = document.querySelector(".completed-task-list");
-    let toggleButton = document.querySelector(".toggle-completed-btn");
+    var completedTasks = document.getElementById("completed-tasks");
+    var btn = document.querySelector(".toggle-completed-btn");
 
-    if (completedTaskSection.style.display === "none" || completedTaskSection.style.display === "") {
-        // ✅ 显示已完成任务
-        completedTaskSection.style.display = "block";
-        toggleButton.innerHTML = "📂 Hide Completed Tasks";
+    if (completedTasks.style.display === "none") {
+        completedTasks.style.display = "block";
+        btn.textContent = "📂 Hide Completed Tasks";
     } else {
-        // ✅ 隐藏已完成任务
-        completedTaskSection.style.display = "none";
-        toggleButton.innerHTML = "📂 Show Completed Tasks";
+        completedTasks.style.display = "none";
+        btn.textContent = "📂 Show Completed Tasks";
     }
 }
 
-/**
- * 更新任务地图
- */
-function updateTaskMap(tasks) {
-    const map = document.querySelector(".pixel-map");
-    map.innerHTML = "";
+document.addEventListener("DOMContentLoaded", function() {
+    // 页面加载后自动调用 fetchAchievements()
+    fetchAchievements();
+});
 
-    tasks.forEach(task => {
-        let mapTile = document.createElement("div");
-        mapTile.className = `map-tile ${task.is_completed ? "completed" : ""}`;
-        mapTile.dataset.taskId = task.id;
-        mapTile.dataset.positionX = task.position_x || 1;
-        mapTile.dataset.positionY = task.position_y || 1;
+async function fetchAchievements() {
+    try {
+        const response = await fetch("/api/user/achievements/", {
+            method: "GET",
+            headers: {
+                // 如果你需要 CSRF 或 Token，写在这里
+                "X-CSRFToken": getCookie("csrftoken")
+                // "Authorization": `Bearer ${localStorage.getItem("token")}`
+            }
+        });
 
-        mapTile.style.gridColumn = task.position_x || 1;
-        mapTile.style.gridRow = task.position_y || 1;
+        if (!response.ok) {
+            throw new Error("❌ 获取成就失败");
+        }
 
-        mapTile.innerHTML = task.difficulty === 3 ? "🔥" : "📜";
-        map.appendChild(mapTile);
-    });
+        // 解析后端返回的 JSON
+        const data = await response.json();
+        console.log("🎉 成就数据:", data);
+
+        // data.achievements 应该是一个字符串数组
+        if (Array.isArray(data.achievements)) {
+            updateTaskMap(data.achievements);
+        } else {
+            console.warn("❌ 后端返回的成就不是数组:", data.achievements);
+        }
+    } catch (error) {
+        console.error("❌ 加载成就失败:", error);
+    }
 }
+
+function updateTaskMap(allAchievements) {
+    console.log("📌 解析解锁的成就 (原始数据):", allAchievements);
+
+    // 获取 #achievements-container 容器
+    const container = document.getElementById("achievements-container");
+    if (!container) {
+        console.error("❌ 找不到 `#achievements-container`，无法显示成就");
+        return;
+    }
+
+    // 不清空容器，避免覆盖旧成就
+    // 如果想每次都只显示最新，可以取消注释下面这行
+    // container.innerHTML = "";
+
+    // 遍历所有成就，追加到页面
+    allAchievements.forEach(feature => {
+        console.log("🔹 解析的成就内容:", feature, "| 类型:", typeof feature);
+
+        if (typeof feature === "string") {
+            // 创建一个 div，用于显示单条成就
+            const featureDiv = document.createElement("div");
+            featureDiv.className = "achievement-item";
+            featureDiv.textContent = `🏅 ${feature}`;
+
+            // 避免重复插入相同成就
+            if (![...container.children].some(child => child.textContent === featureDiv.textContent)) {
+                container.appendChild(featureDiv);
+                console.log("✅ 成就已添加:", feature);
+            } else {
+                console.warn("⚠️ 该成就已存在，跳过:", feature);
+            }
+        } else {
+            console.warn("❌ 无效的成就数据 (不是字符串):", feature);
+        }
+    });
+
+    console.log("✅ 成就显示更新完成！");
+}
+
+
+
+// function updateTaskMap(allAchievements) {
+//     console.log("📌 解析解锁的成就 (原始数据):", allAchievements);
+
+//     // ✅ 确保 `allAchievements` 是数组
+//     if (!Array.isArray(allAchievements)) {
+//         console.error("❌ `allAchievements` 不是数组: ", allAchievements);
+//         return;
+//     }
+
+//     // 🚀 **获取正确的容器**
+//     const achievementsContainer = document.getElementById("achievements-container");
+//     if (!achievementsContainer) {
+//         console.error("❌ 找不到 `#achievements-container`，无法更新任务地图");
+//         return;
+//     }
+
+//     // ✅ **不清空** `achievements-container`，防止覆盖旧成就
+//     // achievementsContainer.innerHTML = ""; ❌ **不要清空**
+
+//     // ✅ 遍历 `allAchievements`，追加新成就
+//     allAchievements.forEach(feature => {
+//         console.log("🔹 解析的成就内容:", feature, "| 类型:", typeof feature);
+
+//         if (typeof feature === "string") {  // ✅ 只接受字符串
+//             let featureElement = document.createElement("div");
+//             featureElement.className = "map-tile achievement";
+//             featureElement.textContent = `🏅 ${feature}`;
+
+//             // **避免重复插入相同成就**
+//             if (![...achievementsContainer.children].some(child => child.textContent === featureElement.textContent)) {
+//                 achievementsContainer.appendChild(featureElement);
+//                 console.log("✅ 成就已添加:", feature);
+//             } else {
+//                 console.warn("⚠️ 该成就已存在，跳过:", feature);
+//             }
+//         } else {
+//             console.warn("❌ 无效的成就数据 (不是字符串):", feature);
+//         }
+//     });
+
+//     console.log("✅ 任务地图更新完成！");
+// }
+
 
 /**
  * 粒子特效
@@ -377,6 +411,11 @@ function getCookie(name) {
     });
     return cookieValue;
 }
+document.addEventListener("DOMContentLoaded", function () {
+    if (navigator.language.startsWith("zh")) {
+        document.documentElement.lang = "en";
+    }
+});
 
 /**
  * 格式化日期

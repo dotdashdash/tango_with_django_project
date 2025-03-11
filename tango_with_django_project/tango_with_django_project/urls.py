@@ -38,6 +38,7 @@ from django.conf.urls.static import static
 router = DefaultRouter()
 router.register(r'tasks', TaskViewSet,basename='task')
 router.register(r'users', UserViewSet)
+# router.register(r'achievements', AchievementViewSet,basename='achievement')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -48,7 +49,8 @@ urlpatterns = [
     path("dashboard/", dashboard_view, name="dashboard"),
     path('', index),
     path('api/', include(router.urls)),
+    path("api/user/achievements/", user_achievements_view, name="user_achievements"),
+    # path("achievements/", achievement_list, name="achievement-list"),
     # path('api/profile/', UserViewSet.as_view({'get': 'profile'})),
     # path('create/', TaskViewSet.as_view({'post':'create'}), name="create_task"),
-    
 ]+static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
