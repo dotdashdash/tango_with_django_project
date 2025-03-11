@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.utils.timezone import now
 from datetime import timedelta
 import random
-from .services import evaluate_difficulty
+# from .services import evaluate_difficulty
 from django.conf import settings
 
 
@@ -70,6 +70,7 @@ class Task(models.Model):
         return complete_task(self)
 
     def save(self, *args, **kwargs):
+        from .services import evaluate_difficulty
         self.priority = self.priority if self.priority is not None else False  # 避免 None
         self.difficulty = evaluate_difficulty(self.title, self.start_date,self.due_date, self.priority)
         super().save(*args, **kwargs)
@@ -82,7 +83,8 @@ class Task(models.Model):
 class Achievement(models.Model):
     name = models.CharField(max_length=32)
     description = models.TextField()
-    unlock_condition = models.CharField(max_length=64)  # 例如: "exp >= 100"
+    unlock_condition = models.IntegerField()  
+    unlocked_at=models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
 class AchievementProgress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

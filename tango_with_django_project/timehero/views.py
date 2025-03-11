@@ -4,8 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
-from .services import evaluate_difficulty, complete_task, to_next_level, cap_by_level, MAX_STAT_POINTS, MAX_HEALTH
-from .services import evaluate_difficulty,complete_task,process_tasks_for_dashboard
+from .services import evaluate_difficulty,complete_task,process_tasks_for_dashboard,check_level_up,get_user_achievements
 from .signals import *
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
@@ -17,7 +16,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-
+from django.http import JsonResponse    
 def index(request):
     return render(request, 'index.html')
 def register_view(request):
@@ -74,37 +73,20 @@ class TaskViewSet(viewsets.ModelViewSet):
         task.difficulty = evaluate_difficulty(task.title, start_date, due_date, priority)
         task.save()
 
-
     @action(detail=True, methods=['post'])
     def complete(self, request, pk=None):
         """ 完成任务后计算经验值，并检查是否升级 """
         task = self.get_object()
-        if not task.is_completed:
-            task.is_completed = True
-            task.save()
 
-            user = task.user
-            user.exp += task.difficulty * 1000
+        if task.is_completed:
+            return Response({"status": "already completed"}, status=400)
 
-            # 升级逻辑
-            experience_to_next_level = to_next_level(user.level)
-            leveled_up = False
+        # ✅ 调用 `services.py` 里的 `complete_task`
+        result = complete_task(task)
 
-            while user.exp >= experience_to_next_level:
-                user.exp -= experience_to_next_level
-                user.level = cap_by_level(user.level + 1)
-                leveled_up = True
+        # ✅ 确保 `Response` 直接返回 `result`
+        return Response(result)  
 
-                experience_to_next_level = to_next_level(user.level)
-                user.hp = MAX_HEALTH
-
-            user.save()
-
-            if leveled_up:
-                # 记录升级事件或发送通知
-                pass
-
-        return Response({"status": "completed"})
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
@@ -129,3 +111,14 @@ def check_email(request):
     if email and User.objects.filter(email=email).exists():
         return JsonResponse({'available': False})
     return JsonResponse({'available': True})
+
+    
+def user_achievements_view(request):
+    """ 返回 JSON 而不是模板 """
+    user = request.user
+    if not user.is_authenticated:
+        # 若要阻止匿名用户，直接返回空或 401
+        return JsonResponse({"achievements": []}, status=200)
+
+    achievements = get_user_achievements(user)
+    return JsonResponse({"achievements": achievements}, status=200)

@@ -1,44 +1,8 @@
 from datetime import datetime
 from django.apps import apps
+import math
+from django.utils.timezone import now
 
-# 经验值奖励规则
-LEVEL_REWARDS = {
-    2: "🌞 Daily Tasks Unlocked! Set tasks to repeat daily.",
-    5: "📋 Batch Task Creation Unlocked! Create multiple tasks at once.",
-    10: "⏰ Task Reminders Unlocked! Get automatic notifications.",
-    15: "🔥 Task Prioritization Unlocked! Mark high-priority tasks.",
-    20: "🏆 Achievement Display Unlocked! View your unlocked achievements.",
-    25: "🎁 Hidden Bonus Tasks Unlocked! Find special challenges.",
-    30: "🗺️ Adventure Mode Unlocked! Explore and find tasks in the world.",
-    40: "⚔️ Boss Mode Unlocked! Special high-reward tasks appear.",
-}
-
-MAX_HEALTH = 5
-MAX_LEVEL = 100
-MAX_STAT_POINTS = MAX_LEVEL
-MAX_LEVEL_HARD_CAP = 9999
-
-def to_next_level(level):
-    """计算下一级所需的经验值"""
-    if level < 5:
-        return 25 * level
-    elif level == 5:
-        return 150
-    else:
-        return round(((level ** 2) * 0.25 + 10 * level + 139.75) / 10) * 10
-
-def cap_by_level(level):
-    """限制等级不超过最大等级"""
-    return min(level, MAX_LEVEL)
-
-# def auto_allocate(user):
-#     """自动分配属性点的逻辑"""
-#     points_to_allocate = user.stat_points
-#     user.strength += points_to_allocate // 4
-#     user.intelligence += points_to_allocate // 4
-#     user.constitution += points_to_allocate // 4
-#     user.perception += points_to_allocate // 4
-#     user.stat_points = 0
 
 def evaluate_difficulty(title, start_date, due_date, priority):
     """
@@ -49,7 +13,7 @@ def evaluate_difficulty(title, start_date, due_date, priority):
     """
     keywords_hard = ["report", "study", "presentation", "deadline", "research"]
     keywords_medium = ["exercise", "meeting", "cleaning", "shopping"]
-    
+
     difficulty = 1  # 默认难度为 Easy
 
     # 计算任务持续时间（分钟）
@@ -79,62 +43,149 @@ def evaluate_difficulty(title, start_date, due_date, priority):
     return difficulty
 
 
+
 def complete_task(task):
     """
     任务完成后：
     - 标记任务完成
-    - 更新用户经验值
+    - 经验值一直累积
     - 检查用户是否升级
     """
-    Task = apps.get_model('timehero', 'Task')
+    # Task = apps.get_model('timehero', 'Task')
     task.is_completed = True
     task.save()
 
     user = task.user
-    user.exp += task.difficulty * 1000  # 经验值计算
-    unlocked_features = []
-
-    # 升级逻辑
-    experience_to_next_level = to_next_level(user.level)
-    while user.exp >= experience_to_next_level:
-        user.exp -= experience_to_next_level
-        user.level = min(user.level + 1, MAX_LEVEL_HARD_CAP)
-        user.hp = min(user.hp + 1, MAX_HEALTH)  # 升级时恢复生命值
-
-        # 检查是否解锁新功能
-        unlocked_feature = LEVEL_REWARDS.get(user.level)
-        if unlocked_feature:
-            unlocked_features.append(unlocked_feature)
-
-        experience_to_next_level = to_next_level(user.level)
-
+    user.exp += task.difficulty * 10  # ✅ 经验值不会被扣除
     user.save()
-    return unlocked_features  # 返回解锁的新功能列表
-def check_level_up(user):
-    """
-    玩家升级逻辑：
-    - 每升一级需要 level * 100 经验值
-    - 每次升级回复 1 点 HP（最多 5）
-    - 根据等级解锁新功能
-    """
-    if user.exp >= user.level * 100:
-        user.exp -= user.level * 100
-        user.level += 1
-        user.hp = min(user.hp + 1, 5)  # HP 上限 5
 
-        unlocked_feature = LEVEL_REWARDS.get(user.level, None)
+    new_level, newly_unlocked, all_achievements = check_level_up(user)
+    Achievement = apps.get_model("timehero", "Achievement")
+    all_achievements = list(
+        Achievement.objects.filter(
+            achievementprogress__user=user, achievementprogress__unlocked=True
+        ).values_list("name", flat=True)
+    )
+
+    return {
+        "status": "completed",
+        "new_level": new_level if new_level else user.level,
+        "exp": user.exp,  # ✅ 确保返回的是累积经验值
+        "unlocked_features": newly_unlocked,
+        "all_achievements": all_achievements,
+    }
+
+
+def check_level_up(user):
+    Achievement = apps.get_model(
+        "timehero", "Achievement"
+    )  # ✅ 通过 `apps.get_model()` 访问模型
+    AchievementProgress = apps.get_model("timehero", "AchievementProgress")
+
+    """
+    计算玩家的等级（逐级累积需求：1->2 需要 100, 2->3 需要 200, etc.）
+    并返回解锁的奖励列表
+    """
+
+    # 在方法里内置所有等级对应的奖励，若超出可自行扩充
+    LEVEL_REWARDS = {
+        2: "🌱 You've reached Level 2! Good start!",
+        3: "🌿 Level 3 unlocked! Keep going!",
+        4: "🍀 Level 4: Another step forward!",
+        5: "🌟 Level 5: Batch Task Creation Unlocked!",
+        6: "💪 Level 6: More tasks, more power!",
+        7: "🔥 Level 7: Fire up your productivity!",
+        8: "🌈 Level 8: Rainbow of possibilities!",
+        9: "💡 Level 9: Enlighten your workflow!",
+        10: "⏰ Level 10: Task Reminders Unlocked!",
+        11: "⚡ Level 11: Lightning-speed progress!",
+        12: "🔮 Level 12: Foresee bigger tasks!",
+        13: "🐲 Level 13: Facing bigger challenges!",
+        14: "🎯 Level 14: Ultra focus unlocked!",
+        15: "🏆 Level 15: Achievement Display Unlocked!",
+        16: "🎁 Level 16: Hidden Bonus Tasks Unlocked!",
+        17: "🌍 Level 17: Adventure Mode Unlocked!",
+        18: "🎉 Level 18: Surprise Party for your tasks!",
+        19: "🚀 Level 19: Rocket your efficiency!",
+        20: "⚔ Level 20: Boss Mode Unlocked! Special high-reward tasks appear.",
+    }
+
+    # 计算“升到 level 级”所需的总经验 = (level-1)*level/2 * 100
+    old_level = user.level
+    new_level = new_level = math.floor(user.exp / 100) + 1
+    newly_unlocked = []  # 存储本次升级解锁的成就
+
+    # 遍历 `LEVEL_REWARDS`，判断是否解锁新成就
+    for lvl, reward in LEVEL_REWARDS.items():
+        if old_level < lvl <= new_level:  # ✅ 只有从旧等级到新等级之间的才解锁
+            achievement, created = Achievement.objects.get_or_create(
+                name=reward, unlock_condition=int(lvl)
+            )
+            progress, created = AchievementProgress.objects.get_or_create(
+                user=user, achievement=achievement
+            )
+
+            if created or not progress.unlocked:
+                progress.unlocked = True
+                progress.unlocked_at = now()
+                progress.save()
+                newly_unlocked.append(
+                    {
+                        "name": achievement.name,
+                        "unlocked_at": progress.unlocked_at.strftime("%Y-%m-%d %H:%M"),
+                    }
+                )  # ✅ 只存储新解锁的成就
+    all_achievements = list(
+        Achievement.objects.filter(
+            achievementprogress__user=user, achievementprogress__unlocked=True
+        ).values_list("name", flat=True)
+    )
+    if new_level > old_level:
+        user.level = new_level
         user.save()
-        return unlocked_feature  # 如果解锁了新功能，返回它
-    return None
+    # return new_level, newly_unlocked, all_achievements  # ✅ 必须返回 3 个
+
+    # return old_level, []
+    return new_level, newly_unlocked, all_achievements
+
+
 def process_tasks_for_dashboard(tasks):
     """
     处理任务数据，确保 tags、checklist 以列表形式返回，避免 Django 模板 split 过滤器问题
     """
     for task in tasks:
         # 去掉多余空格，确保 tags、checklist 是干净的列表
-        task.tags_list = [tag.strip() for tag in task.tags.split(",")] if task.tags else []
-        task.checklist_items = [item.strip() for item in task.checklist.split("\n")] if task.checklist else []
+        task.tags_list = (
+            [tag.strip() for tag in task.tags.split(",")] if task.tags else []
+        )
+        task.checklist_items = (
+            [item.strip() for item in task.checklist.split("\n")]
+            if task.checklist
+            else []
+        )
         task.notes_content = task.notes.strip() if task.notes else ""
 
     return tasks
 
+
+def get_user_achievements(user):
+    """获取当前用户解锁的成就"""
+    AchievementProgress = apps.get_model("timehero", "AchievementProgress")
+    achievements = AchievementProgress.objects.filter(
+        user=user,
+        unlocked=True,
+        # ).values_list("achievement__name", flat=True)
+    ).select_related("achievement")
+    # return list(achievements)  # 返回字符串列表
+    return [
+        {
+            "name": ap.achievement.name,
+            # "description": ap.achievement.description,
+            "unlocked_at": (
+                ap.unlocked_at.strftime("%Y-%m-%d %H:%M")
+                if ap.unlocked_at
+                else "unknown time"
+            ),  # 返回格式化时间
+        }
+        for ap in achievements
+    ]

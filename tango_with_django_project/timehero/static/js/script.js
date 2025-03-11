@@ -11,6 +11,14 @@ document.addEventListener("DOMContentLoaded", function () {
             completeTask(taskId, event);
         }
     });
+    document.querySelector(".achievements-button").addEventListener("click", async function () {
+        const achievements = await fetchAchievements();
+        if (achievements.length > 0) {
+            achievements.forEach((achievement, index) => {
+                setTimeout(() => showAchievementPopup(achievement), index * 500);
+            });
+        }
+    });
 });
 
 function showToast(message, duration = 3000) {
@@ -21,13 +29,6 @@ function showToast(message, duration = 3000) {
     setTimeout(() => toast.remove(), duration);
 }
 
-/**
- * 显示/隐藏任务创建表单
- */
-// function toggleTaskModal() {
-//     let modal = document.getElementById("taskModal");
-//     modal.style.display = (modal.style.display === "none" || modal.style.display === "") ? "block" : "none";
-// }
 // 打开任务创建模态框
 function openTaskModal() {
     document.getElementById("taskModal").style.display = "flex";
@@ -147,6 +148,7 @@ async function submitTask(event) {
 /**
  * 任务完成
  */
+let currentLevel = null;
 async function completeTask(taskId, event) {
     try {
         const response = await fetch(`/api/tasks/${taskId}/complete/`, {
@@ -158,6 +160,8 @@ async function completeTask(taskId, event) {
         });
 
         if (response.ok) {
+            const data = await response.json();
+            console.log("✅ 任务完成返回数据:", data);
             let taskCard = document.getElementById(`task-${taskId}`);
             if (taskCard) {
                 let details = taskCard.querySelector(".task-details");
@@ -176,11 +180,57 @@ async function completeTask(taskId, event) {
             if (data.exp !== undefined) {
                 document.getElementById("exp").textContent = data.exp;
             }
+            fetchTasks();  // 重新加载任务
+            // if (data.level !== undefined) {
+            //     document.getElementById("level").textContent = data.level;
+            // }
+            if (data.new_level !== undefined) {
+                let levelElement = document.getElementById("level");
+                if (levelElement) {
+                    levelElement.textContent = `Lv.${data.new_level}`;
+                }
+            }
+            
+            
+            // if (data.new_level !== undefined) {
+            //     document.getElementById("level").textContent = `Lv. ${data.new_level}`;
+            // }
+            // if (Array.isArray(data.all_achievements) && data.all_achievements.length > 0) {
+            //     updateTaskMap(data.all_achievements);  // ✅ 改用 `all_achievements`
+            // }
+            // if (data.level !== undefined && data.level !== currentLevel) {
+            //     console.log("🎉 等级提升！原等级:", currentLevel, "新等级:", data.level);
+            //     currentLevel = data.level; // 更新当前等级
+
+            //     // ✅ **确保 `all_achievements` 不是 `undefined` 或空**
+            //     if (Array.isArray(data.all_achievements) && data.all_achievements.length > 0) {
+            //         console.log("🎖️ 新成就:", data.all_achievements);
+            //         data.all_achievements.forEach((achievement, index) => {
+            //             setTimeout(() => showAchievementPopup(achievement), index * 500);
+            //         });
+            //     } else {
+            //         console.log("ℹ️ 没有新的成就，不触发弹窗");
+            //     }
+            // } else {
+            //     console.log("ℹ️ 任务完成但未升级，未触发成就弹窗");
+            // }
+            // fetchAchievements();  // ✅ 加载成就
+            // **✅ 修正这里，遍历 `data.unlocked_features` 传入 `showAchievementPopup`**
+            if (Array.isArray(data.unlocked_features) && data.unlocked_features.length > 0) {
+                console.log("📢 触发成就弹窗:", data.unlocked_features);
+                data.unlocked_features.forEach((achievement, index) => {
+                    setTimeout(() => showAchievementPopup(achievement), index * 800);
+                });
+            } else {
+                console.log("ℹ️ 没有新成就");
+            }
+
+            fetchTasks();  // 重新加载任务
         } else {
-            console.error("Task completion failed");
+            console.error("❌ 任务完成失败");
         }
     } catch (error) {
-        console.error("Task completion request error:", error);
+        console.error("❌ 任务完成请求出错:", error);
     }
 }
 
@@ -197,7 +247,7 @@ async function fetchTasks() {
         });
         const tasks = await response.json();
         updateTaskBoard(tasks);
-        updateTaskMap(tasks);
+        // updateTaskMap(tasks);
     } catch (error) {
         console.error("fetch failed", error);
     }
@@ -250,68 +300,6 @@ function updateTaskBoard(tasks) {
     }
 }
 
-
-// function updateTaskBoard(tasks) {
-//     const taskList = document.querySelector(".task-list");
-//     taskList.innerHTML = "";
-
-//     tasks.forEach(task => {
-//         let taskElement = document.createElement("div");
-//         taskElement.className = `task-card ${task.is_completed ? "completed" : ""}`;
-//         taskElement.id = `task-${task.id}`;
-
-//         // 构建任务详情
-//         let taskHTML = `
-//             <div class="task-header">
-//                 <span class="difficulty-${task.difficulty}">
-//                     ${["Easy", "Medium", "Hard"][task.difficulty - 1]}
-//                 </span>
-//                 ${task.is_completed ? `<span class="completed-text">✔️ Done</span>` : ""}
-//                 <p class="task-title">${task.title}</p>
-//             </div>
-//             <div class="task-details" style="display: ${task.is_completed ? 'none' : 'block'};">
-//                 ${task.start_date ? `<p class="task-start">🚀 Start: <span>${formatDate(task.start_date)}</span></p>` : ""}
-//                 ${task.due_date ? `<p class="task-due">⏳ Due: <span>${formatDate(task.due_date)}</span></p>` : ""}
-//         `;
-
-//         // **渲染 Tags（如果有的话）**
-//         if (task.tags && task.tags.trim() !== "") {
-//             let tagsHTML = task.tags.split(",").map(tag => `#${tag.trim()}`).join(" ");
-//             taskHTML += `<p class="task-tags">🏷️ Tags: ${tagsHTML}</p>`;
-//         }
-
-//         // **渲染 Checklist（如果有的话）**
-//         if (task.checklist && task.checklist.trim() !== "") {
-//             let checklistHTML = task.checklist.split("\n").map(item => `✅ ${item.trim()}`).join("<br>");
-//             taskHTML += `<p class="task-checklist">✅ Checklist:<br>${checklistHTML}</p>`;
-//         }
-
-//         // **渲染 Notes（如果有的话）**
-//         if (task.notes && task.notes.trim() !== "") {
-//             taskHTML += `<p class="task-notes">📝 Notes:<br>${task.notes}</p>`;
-//         }
-
-//         taskHTML += `</div>`;  // 关闭 `task-details`
-
-//         // **渲染 "Complete" 按钮**
-//         if (!task.is_completed) {
-//             taskHTML += `<button class="pixel-btn complete-task-btn" data-task-id="${task.id}">✅ Complete</button>`;
-//         }
-
-//         taskElement.innerHTML = taskHTML;
-//         taskList.appendChild(taskElement);
-//     });
-
-//     taskList.innerHTML = `
-//     <div id="active-tasks">
-//         ${activeTasksHTML || "<p>No active tasks 🎯</p>"}
-//     </div>
-//     <button class="pixel-btn toggle-completed-btn" onclick="toggleCompletedTasks()">📂 Show Completed Tasks</button>
-//     <div id="completed-tasks" style="display: none;">
-//         ${completedTasksHTML || "<p>No completed tasks yet ✅</p>"}
-//     </div>
-// `;
-// }
 function toggleCompletedTasks() {
     var completedTasks = document.getElementById("completed-tasks");
     var btn = document.querySelector(".toggle-completed-btn");
@@ -324,27 +312,126 @@ function toggleCompletedTasks() {
         btn.textContent = "📂 Show Completed Tasks";
     }
 }
-/**
- * 更新任务地图
- */
-function updateTaskMap(tasks) {
-    const map = document.querySelector(".pixel-map");
-    map.innerHTML = "";
 
-    tasks.forEach(task => {
-        let mapTile = document.createElement("div");
-        mapTile.className = `map-tile ${task.is_completed ? "completed" : ""}`;
-        mapTile.dataset.taskId = task.id;
-        mapTile.dataset.positionX = task.position_x || 1;
-        mapTile.dataset.positionY = task.position_y || 1;
+// document.addEventListener("DOMContentLoaded", function () {
+//     // 页面加载后自动调用 fetchAchievements()
+//     fetchAchievements();
+// });
 
-        mapTile.style.gridColumn = task.position_x || 1;
-        mapTile.style.gridRow = task.position_y || 1;
+async function fetchAchievements() {
+    try {
+        const response = await fetch("/api/user/achievements/", {
+            method: "GET",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken")
+            }
+        });
 
-        mapTile.innerHTML = task.difficulty === 3 ? "🔥" : "📜";
-        map.appendChild(mapTile);
-    });
+        if (!response.ok) {
+            throw new Error("❌ 获取成就失败");
+        }
+
+        const data = await response.json();
+        console.log("🎉 成就数据:", data);
+
+        if (Array.isArray(data.achievements)) {
+            return data.achievements;
+        } else {
+            console.warn("❌ 后端返回的成就格式不正确:", data.achievements);
+            return [];
+        }
+    } catch (error) {
+        console.error("❌ 加载成就失败:", error);
+        return [];
+    }
 }
+
+/**
+ * 🎖️ 显示单个成就弹窗
+ */
+function showAchievementPopup(achievement) {
+    const popupContainer = document.querySelector(".achievements-popup");
+    console.log("📢 成就弹窗触发，解锁的成就:", achievement);
+
+
+    if (!popupContainer) {
+        console.error("❌ 找不到 `.achievements-popup`");
+        return;
+    }
+
+    if (!achievement || !achievement.name) {
+        console.warn("⚠️ 无效的成就数据:", achievement);
+        return;
+    }
+
+    let unlockedTime = achievement.unlocked_at && achievement.unlocked_at !== "unknown"
+        ? new Date(achievement.unlocked_at).toLocaleString("en-GB", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
+        : "Invalid Date";
+
+    const toast = document.createElement("div");
+    toast.className = "achievement-toast";
+    toast.innerHTML = `🏅 ${achievement.name} <br> <small>解锁时间: ${unlockedTime}</small>`;
+    popupContainer.appendChild(toast);
+
+    // **动画效果**
+    setTimeout(() => toast.classList.add("show"), 100);
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 500);
+    }, 5000);
+}
+
+// function showAchievementPopups(achievements) {
+//     const popupContainer = document.querySelector(".achievements-popup");
+//     const historyList = document.querySelector(".achievements-list");
+
+//     if (!popupContainer || !historyList) {
+//         console.error("❌ 找不到 `.achievements-popup` 或 `.achievements-list`");
+//         return;
+//     }
+
+//     historyList.innerHTML = ""; // 清空历史记录
+
+//     achievements.forEach((feature, index) => {
+//         let unlockedTime = feature.unlocked_at && feature.unlocked_at !== "unknown"
+//             ? new Date(feature.unlocked_at).toLocaleString("en-GB", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
+//             : "Invalid Date";
+
+//         // **创建弹出框**
+//         const toast = document.createElement("div");
+//         toast.className = "achievement-toast";
+//         toast.innerHTML = `🏅 ${feature.name} <br> <small>解锁时间: ${unlockedTime}</small>`;
+//         popupContainer.appendChild(toast);
+
+//         // **动画效果**
+//         setTimeout(() => toast.classList.add("show"), 200 * index);
+//         setTimeout(() => {
+//             toast.classList.remove("show");
+//             setTimeout(() => popupContainer.removeChild(toast), 500);
+//         }, 5000);
+
+//         // **添加到历史列表**
+//         const historyItem = document.createElement("div");
+//         historyItem.className = "achievement-item";
+//         historyItem.innerHTML = `🏅 ${feature.name} <br> <small>解锁时间: ${unlockedTime}</small>`;
+//         historyList.appendChild(historyItem);
+//     });
+
+//     // **显示“查看全部成就”按钮**
+//     document.querySelector(".achievements-button").style.display = "block";
+// }
+
+// // **点击按钮展开/隐藏历史成就**
+// document.addEventListener("click", function (event) {
+//     if (event.target.classList.contains("achievements-button")) {
+//         const historyList = document.querySelector(".achievements-list");
+//         if (historyList.style.display === "block") {
+//             historyList.style.display = "none";
+//         } else {
+//             historyList.style.display = "block";
+//         }
+//     }
+// });
 
 /**
  * 粒子特效
@@ -373,11 +460,34 @@ function getCookie(name) {
     });
     return cookieValue;
 }
+document.addEventListener("DOMContentLoaded", function () {
+    if (navigator.language.startsWith("zh")) {
+        document.documentElement.lang = "en";
+    }
+});
 
 /**
  * 格式化日期
  */
 function formatDate(isoString) {
     let date = new Date(isoString);
-    return date.toLocaleString();
+    return date.toLocaleString("en-GB", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+}
+
+/**
+ * 确保 datetime-local 格式一致
+ */
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('input[type="datetime-local"]').forEach(input => {
+        input.addEventListener("focus", () => forceISOFormat(input));
+        forceISOFormat(input); // 确保格式
+    });
+});
+
+function forceISOFormat(input) {
+    if (!input || !input.value) return;
+    let date = new Date(input.value);
+    if (!isNaN(date.getTime())) {
+        input.value = date.toISOString().slice(0, 16);
+    }
 }
