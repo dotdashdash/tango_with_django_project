@@ -39,6 +39,8 @@ from timehero.views import *
 
 from timehero.views import check_username,check_email_exists
 
+from timehero.views import password_reset_security_question_view
+
 router = DefaultRouter()
 router.register(r'tasks', TaskViewSet,basename='task')
 router.register(r'users', UserViewSet)

@@ -1,4 +1,6 @@
 # views.py
+import json
+
 from django.http import JsonResponse
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
@@ -150,46 +152,68 @@ def password_reset_email_view(request):
         form = EmailForm()
     return render(request, "passwordreset_email.html", {"form": form})
 
+
 def password_reset_security_question_view(request):
     user_id = request.session.get('reset_user_id')
     if not user_id:
+        if request.headers.get('Content-Type') == 'application/json':
+            return JsonResponse({'success': False, 'message': 'Session expired. Please start over.'})
         return redirect('password_reset_email')
 
     user = get_object_or_404(User, id=user_id)
 
-    # 检查账号是否被锁定
+    # Check if account is locked
     if user.is_locked:
-        messages.error(request, "Your account is locked due to too many failed attempts. Please try again later.")
+        message = "Your account is locked due to too many failed attempts. Please try again later."
+        if request.headers.get('Content-Type') == 'application/json':
+            return JsonResponse({'success': False, 'message': message})
+        messages.error(request, message)
         return redirect('login')
 
     if request.method == "POST":
-        form = SecurityQuestionForm(request.POST)
-        if form.is_valid():
-            security_answer = form.cleaned_data['security_answer']
-            new_password = form.cleaned_data['new_password']
+        if request.headers.get('Content-Type') == 'application/json':
+            # Process API request
+            data = json.loads(request.body)
+            security_answer = data.get('security_answer')
+            new_password = data.get('new_password')
 
-            # 检查回答错误次数
+            # Check answer attempt count
             if user.security_answer_attempts >= 3:
                 user.is_locked = True
                 user.save()
-                messages.error(request, "Your account is locked due to too many failed attempts. Please try again later.")
-                return redirect('login')
+                return JsonResponse({
+                    'success': False,
+                    'message': "Your account is locked due to too many failed attempts. Please try again later.",
+                    'redirect_url': '/login/'
+                })
 
             if user.security_answer == security_answer:
                 user.set_password(new_password)
-                user.security_answer_attempts = 0  # 重置错误次数
+                user.security_answer_attempts = 0  # Reset counter
                 user.save()
-                messages.success(request, "Password Reset！")
-                return redirect('login')
+                return JsonResponse({
+                    'success': True,
+                    'message': "Password reset successfully!",
+                    'redirect_url': '/login/'
+                })
             else:
                 user.security_answer_attempts += 1
                 user.last_attempt_time = timezone.now()
                 user.save()
-                messages.error(request, "Incorrect answer。")
+                return JsonResponse({
+                    'success': False,
+                    'message': "Incorrect answer. Please try again."
+                })
+        else:
+            # Process traditional form submission (fallback)
+            form = SecurityQuestionForm(request.POST)
     else:
         form = SecurityQuestionForm()
-    return render(request, "passwordreset_security_question.html", {"form": form, "security_question": user.security_question})
 
+    return render(request, "passwordreset_security_question.html", {
+        "form": form,
+        "security_question": user.security_question
+    })
 def ajax_check_email(request):
     email = request.GET.get('email', None)
     if email and User.objects.filter(email=email).exists():

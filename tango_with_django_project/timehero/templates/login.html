@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>登录 - TimeHero</title>
+  <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
   <!-- 引入 Google Fonts -->
   <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
@@ -213,7 +214,7 @@
       <!-- 密码输入 -->
       <div class="form-group">
         <label for="{{ form.password.id_for_label }}">Password</label>
-        <a class="forgot-password" href="">Forgot Password? (to be implemented)</a>
+        <a class="forgot-password" href="{% url 'password_reset_email' %}">Forgot Password? </a>
         {{ form.password }}
         {% if form.password.errors %}
           {% for error in form.password.errors %}
