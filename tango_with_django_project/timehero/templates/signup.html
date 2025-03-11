@@ -36,11 +36,22 @@
     
             <label for="id_password2">🔄 Confirm Password:</label>
             <input type="password" id="id_password2" name="password2" required>
+
+            <label for="id_security_question">❓ Security Question:</label>
+            <select id="id_security_question" name="security_question" class="form-control">
+                {% for value, label in form.security_question.field.choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        
+            <label for="id_security_answer">✏️ Your Answer:</label>
+            <input type="text" id="id_security_answer" name="security_answer" class="form-control" required>
+        
     
             <button type="submit" class="pixel-btn register-btn">✅ REGISTER</button>
         </form>
         
-        <p class="existing-user-text">Existing user? <a href="{% url 'login' %}">log in here</a></p>
+        <p class="existing-user-text">Existing user? <a href="{% url 'index' %}">log in here</a></p>
     </div>
     
 

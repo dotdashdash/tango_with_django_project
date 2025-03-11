@@ -28,6 +28,28 @@ class User(AbstractUser):
                                     help_text='Specific permissions for this user.',
                                     related_name="timehero_user_permissions",
                                     related_query_name="user",)
+    security_question = models.CharField(max_length=255, blank=True)
+    security_answer = models.CharField(max_length=255, blank=True)
+    email = models.EmailField(unique=True)
+    security_answer_attempts = models.IntegerField(default=0)
+    is_locked = models.BooleanField(default=False)
+    last_attempt_time = models.DateTimeField(null=True, blank=True)
+
+    def reset_password(self, email, new_password, security_answer):
+        try:
+            user = User.objects.get(email=email)
+            if user.security_answer == security_answer:
+                user.set_password(new_password)
+                user.save()
+                return True
+        except User.DoesNotExist:
+            pass
+        return False
+
+    def get_security_question(self):
+        return self.security_question
+
+    
 
 # class Task(models.Model):
 #     DIFFICULTY_CHOICES = [
@@ -82,7 +104,7 @@ class Task(models.Model):
 class Achievement(models.Model):
     name = models.CharField(max_length=32)
     description = models.TextField()
-    unlock_condition = models.IntegerField()  
+    unlock_condition = models.IntegerField(default=0)  
     unlocked_at=models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
 class AchievementProgress(models.Model):

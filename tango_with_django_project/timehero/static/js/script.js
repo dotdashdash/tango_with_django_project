@@ -380,59 +380,6 @@ function showAchievementPopup(achievement) {
         setTimeout(() => toast.remove(), 500);
     }, 5000);
 }
-
-// function showAchievementPopups(achievements) {
-//     const popupContainer = document.querySelector(".achievements-popup");
-//     const historyList = document.querySelector(".achievements-list");
-
-//     if (!popupContainer || !historyList) {
-//         console.error("❌ 找不到 `.achievements-popup` 或 `.achievements-list`");
-//         return;
-//     }
-
-//     historyList.innerHTML = ""; // 清空历史记录
-
-//     achievements.forEach((feature, index) => {
-//         let unlockedTime = feature.unlocked_at && feature.unlocked_at !== "unknown"
-//             ? new Date(feature.unlocked_at).toLocaleString("en-GB", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
-//             : "Invalid Date";
-
-//         // **创建弹出框**
-//         const toast = document.createElement("div");
-//         toast.className = "achievement-toast";
-//         toast.innerHTML = `🏅 ${feature.name} <br> <small>解锁时间: ${unlockedTime}</small>`;
-//         popupContainer.appendChild(toast);
-
-//         // **动画效果**
-//         setTimeout(() => toast.classList.add("show"), 200 * index);
-//         setTimeout(() => {
-//             toast.classList.remove("show");
-//             setTimeout(() => popupContainer.removeChild(toast), 500);
-//         }, 5000);
-
-//         // **添加到历史列表**
-//         const historyItem = document.createElement("div");
-//         historyItem.className = "achievement-item";
-//         historyItem.innerHTML = `🏅 ${feature.name} <br> <small>解锁时间: ${unlockedTime}</small>`;
-//         historyList.appendChild(historyItem);
-//     });
-
-//     // **显示“查看全部成就”按钮**
-//     document.querySelector(".achievements-button").style.display = "block";
-// }
-
-// // **点击按钮展开/隐藏历史成就**
-// document.addEventListener("click", function (event) {
-//     if (event.target.classList.contains("achievements-button")) {
-//         const historyList = document.querySelector(".achievements-list");
-//         if (historyList.style.display === "block") {
-//             historyList.style.display = "none";
-//         } else {
-//             historyList.style.display = "block";
-//         }
-//     }
-// });
-
 /**
  * 粒子特效
  */
