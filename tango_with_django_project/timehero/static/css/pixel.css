@@ -1,7 +1,8 @@
 /* 基础像素风格 */
 body {
   background: #f4f0f0;
-  color: #8bc34a;
+  /* color: #8bc34a; */
+  color:rgb(198, 255, 209);
   font-family: 'Press Start 2P', cursive;
   font-size: 16px;
   line-height: 1.5;
@@ -17,14 +18,38 @@ body {
 header {
   width: 100%;
   padding: 10px 0;
-  background: rgba(0, 0, 0, 0.8);
+  /* background: rgba(125, 80, 127, 0.566); */
   color: white;
   text-align: center;
   font-size: 20px;
   overflow: hidden;
 }
-
+.timehero-title {
+  font-weight: bold;
+  color: rgb(126, 80, 137); /* 文字颜色 */
+  font-size: 45px; /* 字体大小 */
+  text-shadow: 
+      3px 3px 0px rgb(198, 255, 209),  /* 右下 */
+      -3px -3px 0px black, /* 左上 */
+      -3px 3px 0px black,  /* 左下 */
+      3px -3px 0px black;  /* 右上 */
+}
+.timehero-center {
+  font-weight: bold;
+  color:rgb(198, 255, 209);
+  font-size: 20px;
+  text-shadow: 
+      3px 3px 0px rgb(126, 80, 137),  /* 右下 */
+      -3px -3px 0px black, /* 左上 */
+      -3px 3px 0px black,  /* 左下 */
+      3px -3px 0px black;  /* 右上 */
+}
 .pixel-container {
+  background-image: url('/static/image/loginbox.webp'); /* 确保路径正确 */
+  background-size: cover;  /* 让背景铺满整个容器 */
+  background-position: center;  /* 让背景居中 */
+  background-repeat: no-repeat;  /* 不重复 */
+  /* opacity: 0.6; */
 
   display: flex;
   flex-direction: column;
@@ -37,7 +62,7 @@ header {
   padding: 20px;
   border: 4px solid #4a4a4a;
   /* background: #f6f0f0; */
-  background: transparent !important;
+  /* background: transparent !important; */
 }
 
 .pixel-btn,.complete-task-btn,
@@ -50,7 +75,7 @@ header {
   /* background: #8bc34a; */
   /* color: #000; */
   color: white;
-  background-color: #4CAF50;
+  background-color: rgba(125, 80, 127, 0.566);
   border: 2px solid #fff;
   border-radius: 5px;
   padding: 8px 16px;
@@ -58,8 +83,8 @@ header {
 
 }
 
-.pixel-btn:hover {
-  background: #7cb342;
+.pixel-btn:hover,.achievements-button:hover {
+  background: rgba(236, 43, 243, 0.616);
   transform: translateY(-1px);
 }
 
@@ -96,9 +121,10 @@ header {
 .login-box button,
 .register-btn {
   font-family: "Press Start 2P", cursive;
-  background: #4CAF50;
+  /* background: #4CAF50; */
+  background: white;
   /* 统一绿色 */
-  color: white;
+  color: rgba(125, 80, 127, 0.566);
   padding: 12px;
   margin: 10px auto;
   text-align: center;
@@ -115,7 +141,7 @@ header {
 
 .login-box button:hover,
 .register-btn:hover {
-  background: #45a049;
+  background: rgba(236, 43, 243, 0.616);
 }
 
 

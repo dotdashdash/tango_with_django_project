@@ -11,7 +11,14 @@ document.addEventListener("DOMContentLoaded", function () {
             completeTask(taskId, event);
         }
     });
-
+    document.querySelector(".achievements-button").addEventListener("click", async function () {
+        const achievements = await fetchAchievements();
+        if (achievements.length > 0) {
+            achievements.forEach((achievement, index) => {
+                setTimeout(() => showAchievementPopup(achievement), index * 500);
+            });
+        }
+    });
 });
 
 function showToast(message, duration = 3000) {
@@ -141,6 +148,7 @@ async function submitTask(event) {
 /**
  * 任务完成
  */
+let currentLevel = null;
 async function completeTask(taskId, event) {
     try {
         const response = await fetch(`/api/tasks/${taskId}/complete/`, {
@@ -153,6 +161,7 @@ async function completeTask(taskId, event) {
 
         if (response.ok) {
             const data = await response.json();
+            console.log("✅ task completion:", data);
             let taskCard = document.getElementById(`task-${taskId}`);
             if (taskCard) {
                 let details = taskCard.querySelector(".task-details");
@@ -171,17 +180,57 @@ async function completeTask(taskId, event) {
             if (data.exp !== undefined) {
                 document.getElementById("exp").textContent = data.exp;
             }
-            if (data.level !== undefined) {
-                document.getElementById("level").textContent = data.level;
+            fetchTasks();  // 重新加载任务
+            // if (data.level !== undefined) {
+            //     document.getElementById("level").textContent = data.level;
+            // }
+            if (data.new_level !== undefined) {
+                let levelElement = document.getElementById("level");
+                if (levelElement) {
+                    levelElement.textContent = `Lv.${data.new_level}`;
+                }
             }
-            if (Array.isArray(data.all_achievements) && data.all_achievements.length > 0) {
-                updateTaskMap(data.all_achievements);  // ✅ 改用 `all_achievements`
+            
+            
+            // if (data.new_level !== undefined) {
+            //     document.getElementById("level").textContent = `Lv. ${data.new_level}`;
+            // }
+            // if (Array.isArray(data.all_achievements) && data.all_achievements.length > 0) {
+            //     updateTaskMap(data.all_achievements);  // ✅ 改用 `all_achievements`
+            // }
+            // if (data.level !== undefined && data.level !== currentLevel) {
+            //     console.log("🎉 等级提升！原等级:", currentLevel, "新等级:", data.level);
+            //     currentLevel = data.level; // 更新当前等级
+
+            //     // ✅ **确保 `all_achievements` 不是 `undefined` 或空**
+            //     if (Array.isArray(data.all_achievements) && data.all_achievements.length > 0) {
+            //         console.log("🎖️ 新成就:", data.all_achievements);
+            //         data.all_achievements.forEach((achievement, index) => {
+            //             setTimeout(() => showAchievementPopup(achievement), index * 500);
+            //         });
+            //     } else {
+            //         console.log("ℹ️ 没有新的成就，不触发弹窗");
+            //     }
+            // } else {
+            //     console.log("ℹ️ 任务完成但未升级，未触发成就弹窗");
+            // }
+            // fetchAchievements();  // ✅ 加载成就
+            // **✅ 修正这里，遍历 `data.unlocked_features` 传入 `showAchievementPopup`**
+            if (Array.isArray(data.unlocked_features) && data.unlocked_features.length > 0) {
+                console.log("📢 UNLOCK!:", data.unlocked_features);
+                data.unlocked_features.forEach((achievement, index) => {
+                    setTimeout(() => showAchievementPopup(achievement), index * 800);
+                });
+            } else {
+                console.log("ℹ️ no new achievements");
             }
+
+            fetchTasks();  // 重新加载任务
         } else {
-            console.error("Task completion failed");
+            console.error("❌ task completion failed");
         }
     } catch (error) {
-        console.error("Task completion request error:", error);
+        console.error("❌ task request failed:", error);
     }
 }
 
@@ -264,126 +313,73 @@ function toggleCompletedTasks() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-    // 页面加载后自动调用 fetchAchievements()
-    fetchAchievements();
-});
+// document.addEventListener("DOMContentLoaded", function () {
+//     // 页面加载后自动调用 fetchAchievements()
+//     fetchAchievements();
+// });
 
 async function fetchAchievements() {
     try {
         const response = await fetch("/api/user/achievements/", {
             method: "GET",
             headers: {
-                // 如果你需要 CSRF 或 Token，写在这里
                 "X-CSRFToken": getCookie("csrftoken")
-                // "Authorization": `Bearer ${localStorage.getItem("token")}`
             }
         });
 
         if (!response.ok) {
-            throw new Error("❌ 获取成就失败");
+            throw new Error("❌ fetch fails");
         }
 
-        // 解析后端返回的 JSON
         const data = await response.json();
-        console.log("🎉 成就数据:", data);
+        // console.log("🎉 成就数据:", data);
 
-        // data.achievements 应该是一个字符串数组
         if (Array.isArray(data.achievements)) {
-            updateTaskMap(data.achievements);
+            return data.achievements;
         } else {
-            console.warn("❌ 后端返回的成就不是数组:", data.achievements);
+            console.warn("❌ invalid format:", data.achievements);
+            return [];
         }
     } catch (error) {
-        console.error("❌ 加载成就失败:", error);
+        console.error("❌ load fails:", error);
+        return [];
     }
 }
 
-function updateTaskMap(allAchievements) {
-    console.log("📌 解析解锁的成就 (原始数据):", allAchievements);
+/**
+ * 🎖️ 显示单个成就弹窗
+ */
+function showAchievementPopup(achievement) {
+    const popupContainer = document.querySelector(".achievements-popup");
+    console.log("📢 UNLOCK!:", achievement);
 
-    // 获取 #achievements-container 容器
-    const container = document.getElementById("achievements-container");
-    if (!container) {
-        console.error("❌ 找不到 `#achievements-container`，无法显示成就");
+
+    if (!popupContainer) {
+        console.error("❌ can't find `.achievements-popup`");
         return;
     }
 
-    // 不清空容器，避免覆盖旧成就
-    // 如果想每次都只显示最新，可以取消注释下面这行
-    // container.innerHTML = "";
+    if (!achievement || !achievement.name) {
+        console.warn("⚠️ invalid data:", achievement);
+        return;
+    }
 
-    // 遍历所有成就，追加到页面
-    allAchievements.forEach(feature => {
-        console.log("🔹 解析的成就内容:", feature, "| 类型:", typeof feature);
+    let unlockedTime = achievement.unlocked_at && achievement.unlocked_at !== "unknown"
+        ? new Date(achievement.unlocked_at).toLocaleString("en-GB", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
+        : "Invalid Date";
 
-        if (typeof feature === "string") {
-            // 创建一个 div，用于显示单条成就
-            const featureDiv = document.createElement("div");
-            featureDiv.className = "achievement-item";
-            featureDiv.textContent = `🏅 ${feature}`;
+    const toast = document.createElement("div");
+    toast.className = "achievement-toast";
+    toast.innerHTML = `🏅 ${achievement.name} <br> <small>unlocked at: ${unlockedTime}</small>`;
+    popupContainer.appendChild(toast);
 
-            // 避免重复插入相同成就
-            if (![...container.children].some(child => child.textContent === featureDiv.textContent)) {
-                container.appendChild(featureDiv);
-                console.log("✅ 成就已添加:", feature);
-            } else {
-                console.warn("⚠️ 该成就已存在，跳过:", feature);
-            }
-        } else {
-            console.warn("❌ 无效的成就数据 (不是字符串):", feature);
-        }
-    });
-
-    console.log("✅ 成就显示更新完成！");
+    // **动画效果**
+    setTimeout(() => toast.classList.add("show"), 100);
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 500);
+    }, 5000);
 }
-
-
-
-// function updateTaskMap(allAchievements) {
-//     console.log("📌 解析解锁的成就 (原始数据):", allAchievements);
-
-//     // ✅ 确保 `allAchievements` 是数组
-//     if (!Array.isArray(allAchievements)) {
-//         console.error("❌ `allAchievements` 不是数组: ", allAchievements);
-//         return;
-//     }
-
-//     // 🚀 **获取正确的容器**
-//     const achievementsContainer = document.getElementById("achievements-container");
-//     if (!achievementsContainer) {
-//         console.error("❌ 找不到 `#achievements-container`，无法更新任务地图");
-//         return;
-//     }
-
-//     // ✅ **不清空** `achievements-container`，防止覆盖旧成就
-//     // achievementsContainer.innerHTML = ""; ❌ **不要清空**
-
-//     // ✅ 遍历 `allAchievements`，追加新成就
-//     allAchievements.forEach(feature => {
-//         console.log("🔹 解析的成就内容:", feature, "| 类型:", typeof feature);
-
-//         if (typeof feature === "string") {  // ✅ 只接受字符串
-//             let featureElement = document.createElement("div");
-//             featureElement.className = "map-tile achievement";
-//             featureElement.textContent = `🏅 ${feature}`;
-
-//             // **避免重复插入相同成就**
-//             if (![...achievementsContainer.children].some(child => child.textContent === featureElement.textContent)) {
-//                 achievementsContainer.appendChild(featureElement);
-//                 console.log("✅ 成就已添加:", feature);
-//             } else {
-//                 console.warn("⚠️ 该成就已存在，跳过:", feature);
-//             }
-//         } else {
-//             console.warn("❌ 无效的成就数据 (不是字符串):", feature);
-//         }
-//     });
-
-//     console.log("✅ 任务地图更新完成！");
-// }
-
-
 /**
  * 粒子特效
  */

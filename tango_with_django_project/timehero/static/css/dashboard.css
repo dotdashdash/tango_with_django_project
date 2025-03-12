@@ -2,11 +2,29 @@
 body {
     display: block;
     background: #1a1a1a;
-    color: white;
+    color: rgba(236, 43, 243, 0.616);
     font-family: 'VT323', monospace;
     font-size: 16px;
     margin: 0;
     padding: 0;
+}
+/* Dashboard 背景样式 */
+.dashboard-container {
+    position: relative;
+    background: url('/static/image/backgd.webp') no-repeat center center fixed;
+    background-size: cover;
+    width: 100vw;
+    height: 100vh;
+}
+.dashboard-container::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.5); /* 叠加半透明白色 */
+    z-index: -1;
 }
 
 /* 📌 顶部状态栏 */
@@ -14,11 +32,12 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #222;
+    /* background: #f09fde; */
     padding: 10px 20px;
-    font-size: 16px;
+    font-size: 20px;
+    /* font-weight: bold; */
     width: 100%;
-    border-bottom: 2px solid #444;
+    /* border-bottom: 2px solid #444; */
     box-sizing: border-box;
     overflow: hidden;
 }
@@ -26,7 +45,7 @@ body {
 .status-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 /* 🏗️ 主要内容区域布局 */
@@ -38,12 +57,14 @@ body {
     padding: 20px;
     gap: 20px;
     overflow: auto;
+    /* font-size: 16px; */
 }
 
 #task-board, #leaderboard-container {
     flex: 1;
     padding: 20px;
-    background: #2d2d2d;
+    /* background: #2d2d2d; */
+    background: #f2dfec;;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     min-height: 400px; /* 保持高度一致 */
@@ -88,7 +109,7 @@ body {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color:  rgba(125, 80, 127, 0.566);
     /* 半透明黑色背景 */
     display: flex;
     justify-content: center;
@@ -148,8 +169,8 @@ body {
     width: 100%;
     padding: 10px;
     margin-top: 10px;
-    background-color: #8bc34a;
-    color: black;
+    background-color: rgba(125, 80, 127, 0.566);
+    color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -157,7 +178,7 @@ body {
 }
 
 .modal .pixel-btn:hover {
-    background-color: #6f9a36;
+    background-color: rgba(236, 43, 243, 0.616);
 }
 
 .task-card {
@@ -171,7 +192,7 @@ body {
     /* ✅ 增大字体 */
     line-height: 1.6;
     /* ✅ 增大行距 */
-    border: 2px solid #8bc34a;
+    border: 2px solid rgba(236, 43, 243, 0.616);
     /* ✅ 绿色边框 */
 }
 
@@ -266,7 +287,7 @@ body {
     padding: 12px;
     font-size: 14px;
     color: white;
-    background-color: #4CAF50;
+    background-color: rgba(125, 80, 127, 0.566);
     border: 2px solid #fff;
     font-weight: bold;
     border-radius: 8px;
@@ -280,7 +301,7 @@ body {
 }
 
 .complete-task-btn:hover, .toggle-completed-btn:hover {
-    background: #6f9a36;
+    background: rgba(236, 43, 243, 0.616);
 }
 
 /* ✅ 完成任务效果 */
@@ -329,7 +350,7 @@ body {
 
 /* ✅ 成就弹出框样式 */
 .achievement-toast {
-    background: rgba(0, 0, 0, 0.8);
+    background:  rgba(125, 80, 127, 0.566);
     color: white;
     padding: 12px 15px;
     border-radius: 8px;

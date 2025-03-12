@@ -13,11 +13,12 @@
     <link rel="stylesheet" href="{% static 'css/pixel.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
 
 
 </head>
 
-<body>
+<body class="dashboard-container">
 
     <!-- 状态栏 -->
     <div class="status-bar">
@@ -25,9 +26,9 @@
             <img src="{% static 'sprites/hero.png' %}" class="pixel-icon">
             <span id="level">Lv.{{ user.level }}</span> | <span>{{ user.username }}</span>
         </div>
-        <div class="status-item">
+        <!-- <div class="status-item">
             ❤️ <span id="hp">{{ user.hp }}</span>/5
-        </div>
+        </div> -->
         <div class="status-item">
             <img src="{% static 'sprites/coins.png' %}" class="pixel-icon">
             <span id="exp">{{ user.exp }}</span> EXP
