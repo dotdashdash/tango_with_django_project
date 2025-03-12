@@ -36,7 +36,7 @@ def register_view(request):
     return render(request, "signup.html", {"form": form})
 
 class PixelLoginView(LoginView):
-    template_name = 'login.html'
+    # template_name = 'login.html'
     authentication_form = UserLoginForm
     success_url = reverse_lazy('dashboard')
     

@@ -7,7 +7,7 @@ from .models import *
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         # 初始成就进度
-        for achievement in Achievement.objects.filter(unlock_condition="exp >= 0"):
+        for achievement in Achievement.objects.filter(unlock_condition__lte=instance.level):
             AchievementProgress.objects.create(
                 user=instance, 
                 achievement=achievement
