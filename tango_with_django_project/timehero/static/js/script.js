@@ -161,7 +161,7 @@ async function completeTask(taskId, event) {
 
         if (response.ok) {
             const data = await response.json();
-            console.log("✅ 任务完成返回数据:", data);
+            console.log("✅ task completion:", data);
             let taskCard = document.getElementById(`task-${taskId}`);
             if (taskCard) {
                 let details = taskCard.querySelector(".task-details");
@@ -217,20 +217,20 @@ async function completeTask(taskId, event) {
             // fetchAchievements();  // ✅ 加载成就
             // **✅ 修正这里，遍历 `data.unlocked_features` 传入 `showAchievementPopup`**
             if (Array.isArray(data.unlocked_features) && data.unlocked_features.length > 0) {
-                console.log("📢 触发成就弹窗:", data.unlocked_features);
+                console.log("📢 UNLOCK!:", data.unlocked_features);
                 data.unlocked_features.forEach((achievement, index) => {
                     setTimeout(() => showAchievementPopup(achievement), index * 800);
                 });
             } else {
-                console.log("ℹ️ 没有新成就");
+                console.log("ℹ️ no new achievements");
             }
 
             fetchTasks();  // 重新加载任务
         } else {
-            console.error("❌ 任务完成失败");
+            console.error("❌ task completion failed");
         }
     } catch (error) {
-        console.error("❌ 任务完成请求出错:", error);
+        console.error("❌ task request failed:", error);
     }
 }
 
@@ -328,20 +328,20 @@ async function fetchAchievements() {
         });
 
         if (!response.ok) {
-            throw new Error("❌ 获取成就失败");
+            throw new Error("❌ fetch fails");
         }
 
         const data = await response.json();
-        console.log("🎉 成就数据:", data);
+        // console.log("🎉 成就数据:", data);
 
         if (Array.isArray(data.achievements)) {
             return data.achievements;
         } else {
-            console.warn("❌ 后端返回的成就格式不正确:", data.achievements);
+            console.warn("❌ invalid format:", data.achievements);
             return [];
         }
     } catch (error) {
-        console.error("❌ 加载成就失败:", error);
+        console.error("❌ load fails:", error);
         return [];
     }
 }
@@ -351,16 +351,16 @@ async function fetchAchievements() {
  */
 function showAchievementPopup(achievement) {
     const popupContainer = document.querySelector(".achievements-popup");
-    console.log("📢 成就弹窗触发，解锁的成就:", achievement);
+    console.log("📢 UNLOCK!:", achievement);
 
 
     if (!popupContainer) {
-        console.error("❌ 找不到 `.achievements-popup`");
+        console.error("❌ can't find `.achievements-popup`");
         return;
     }
 
     if (!achievement || !achievement.name) {
-        console.warn("⚠️ 无效的成就数据:", achievement);
+        console.warn("⚠️ invalid data:", achievement);
         return;
     }
 
@@ -370,7 +370,7 @@ function showAchievementPopup(achievement) {
 
     const toast = document.createElement("div");
     toast.className = "achievement-toast";
-    toast.innerHTML = `🏅 ${achievement.name} <br> <small>解锁时间: ${unlockedTime}</small>`;
+    toast.innerHTML = `🏅 ${achievement.name} <br> <small>unlocked at: ${unlockedTime}</small>`;
     popupContainer.appendChild(toast);
 
     // **动画效果**

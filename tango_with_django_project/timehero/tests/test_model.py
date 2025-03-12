@@ -27,29 +27,29 @@ class UserModelTest(TestCase):
         self.assertEqual(self.user.get_security_question(), "What is the name of your first pet？")
 
 
-# class TaskModelTest(TestCase):
-#     def setUp(self):
-#         """ 创建测试用户和任务 """
-#         self.user = User.objects.create_user(username="taskuser", email="task@example.com", password="testpass")
-#         self.task = Task.objects.create(
-#             user=self.user,
-#             title="Test Task",
-#             description="This is a test task",
-#             difficulty=2,
-#             is_completed=False
-#         )
+class TaskModelTest(TestCase):
+    def setUp(self):
+        """ 创建测试用户和任务 """
+        self.user = User.objects.create_user(username="taskuser", email="task@example.com", password="testpass@")
+        self.task = Task.objects.create(
+            user=self.user,
+            title="Test Task",
+            description="This is a test task",
+            difficulty=2,
+            is_completed=False
+        )
 
-#     def test_task_creation(self):
-#         """ 测试任务创建 """
-#         self.assertEqual(self.task.title, "Test Task")
-#         self.assertEqual(self.task.difficulty, 2)
-#         self.assertFalse(self.task.is_completed)
+    def test_task_creation(self):
+        """ 测试任务创建 """
+        self.assertEqual(self.task.title, "Test Task")
+        self.assertEqual(self.task.difficulty, 2)
+        self.assertFalse(self.task.is_completed)
 
-#     def test_complete_task(self):
-#         """ 测试任务完成功能 """
-#         self.task.is_completed = True
-#         self.task.save()
-#         self.assertTrue(self.task.is_completed)
+    def test_complete_task(self):
+        """ 测试任务完成功能 """
+        self.task.is_completed = True
+        self.task.save()
+        self.assertTrue(self.task.is_completed)
 
 
 # class AchievementModelTest(TestCase):

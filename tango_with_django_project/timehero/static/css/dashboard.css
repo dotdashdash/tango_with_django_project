@@ -144,7 +144,7 @@ body {
 }
 
 /* 按钮 */
-.modal .pixel-btn {
+.modal .pixel-btn,.achievements-button {
     width: 100%;
     padding: 10px;
     margin-top: 10px;
@@ -260,7 +260,7 @@ body {
 }
 
 /* ✅ 任务操作按钮 */
-.complete-task-btn, .toggle-completed-btn {
+.complete-task-btn, .toggle-completed-btn,.achievements-button {
     width: 90%;
     max-width: 300px;
     padding: 12px;
@@ -304,7 +304,7 @@ body {
     align-items: flex-start;
     position: relative;
 } */
-
+/*
 .achievements-button {
     align-self: flex-end;
     margin-top: 10px;
@@ -315,7 +315,7 @@ body {
     border-radius: 5px;
     cursor: pointer;
 }
-
+*/
 /* ✅ 让成就展示在右下角 */
 .achievements-popup-container {
     position: fixed;

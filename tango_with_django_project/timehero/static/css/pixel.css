@@ -41,7 +41,7 @@ header {
 }
 
 .pixel-btn,.complete-task-btn,
-.toggle-completed-btn {
+.toggle-completed-btn,.achievements-button {
   display: block;
   margin: 10px auto;
   /* width: 100%; */
