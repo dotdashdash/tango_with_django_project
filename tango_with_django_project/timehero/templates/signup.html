@@ -16,7 +16,7 @@
 
     <header>
         <a class="home-btn" href="{% url 'index' %}">🏠 HOME</a>
-        <h2 class="header-title">🎮 Join <span style="color: #8bc34a;">TimeHero</span> 🎮</h2>
+        <h1 ><span style="color:rgba(125, 80, 127, 0.566)">🎮 Join</span> <span class="timehero-title">TimeHero</span> 🎮</h1>
     </header>
     
     <div class="register-box">
@@ -38,7 +38,7 @@
             <input type="password" id="id_password2" name="password2" required>
 
             <label for="id_security_question">❓ Security Question:</label>
-            <select id="id_security_question" name="security_question" class="form-control">
+            <select id="id_security_question" name="security_question" class="form-control" style="color:rgba(125, 80, 127, 0.566)">
                 {% for value, label in form.security_question.field.choices %}
                     <option value="{{ value }}">{{ label }}</option>
                 {% endfor %}
@@ -48,7 +48,7 @@
             <input type="text" id="id_security_answer" name="security_answer" class="form-control" required>
         
     
-            <button type="submit" class="pixel-btn register-btn">✅ REGISTER</button>
+            <button type="submit" class="register-btn">REGISTER</button>
         </form>
         
         <p class="existing-user-text">Existing user? <a href="{% url 'index' %}">log in here</a></p>
