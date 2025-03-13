@@ -1,0 +1,22 @@
+# asgiref @ file:///home/conda/feedstock_root/build_artifacts/asgiref_1733215607532/work
+asgiref
+certifi==2024.12.14
+charset-normalizer==3.4.1
+# Django @ file:///home/conda/feedstock_root/build_artifacts/django_1733376776721/work
+Django
+djangorestframework==3.15.2
+idna==3.10
+numpy==1.24.4
+pandas==2.0.0
+# pillow @ file:///Users/runner/miniforge3/conda-bld/pillow_1735929746402/work
+pillow
+python-dateutil==2.9.0.post0
+pytz==2024.2
+requests==2.32.3
+six==1.17.0
+# sqlparse @ file:///home/conda/feedstock_root/build_artifacts/sqlparse_1734007102193/work
+sqlparse
+# typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/typing_extensions_1733188668063/work
+typing_extensions
+tzdata==2024.2
+urllib3==2.2.3

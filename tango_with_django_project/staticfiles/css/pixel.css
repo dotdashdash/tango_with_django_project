@@ -1,0 +1,261 @@
+/* 基础像素风格 */
+body {
+  background: #f4f0f0;
+  color: #8bc34a;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 16px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+
+}
+
+header {
+  width: 100%;
+  padding: 10px 0;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  text-align: center;
+  font-size: 20px;
+  overflow: hidden;
+}
+
+.pixel-container {
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  max-width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 4px solid #4a4a4a;
+  /* background: #f6f0f0; */
+  background: transparent !important;
+}
+
+.pixel-btn,.complete-task-btn,
+.toggle-completed-btn {
+  display: block;
+  margin: 10px auto;
+  /* width: 100%; */
+  text-decoration: none;
+  text-align: center;
+  /* background: #8bc34a; */
+  /* color: #000; */
+  color: white;
+  background-color: #4CAF50;
+  border: 2px solid #fff;
+  border-radius: 5px;
+  padding: 8px 16px;
+  font-family: 'Press Start 2P', cursive;
+
+}
+
+.pixel-btn:hover {
+  background: #7cb342;
+  transform: translateY(-1px);
+}
+
+.login-box {
+  background: rgba(255, 255, 255, 0.9);
+  /* 半透明背景 */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  font-family: 'Press Start 2P', cursive;
+  width: 320px;
+  /* 设置固定宽度，避免变形 */
+  text-align: center;
+  box-sizing: border-box;
+  margin: 50 auto;
+
+}
+
+.login-box input {
+  display: block;
+  width: 100%;
+  /* 让输入框铺满 */
+  padding: 12px;
+  margin: 10px 0;
+  font-size: 16px;
+  font-family: inherit;
+  border: 3px solid black;
+  background: white;
+  box-sizing: border-box;
+
+}
+
+
+.login-box button,
+.register-btn {
+  font-family: "Press Start 2P", cursive;
+  background: #4CAF50;
+  /* 统一绿色 */
+  color: white;
+  padding: 12px;
+  margin: 10px auto;
+  text-align: center;
+  cursor: pointer;
+  text-transform: uppercase;
+  width: 80%;
+  /* 让按钮占满输入框的宽度 */
+  font-size: 16px;
+  display: block;
+  border: 2px solid black;
+  box-sizing: border-box;
+}
+
+
+.login-box button:hover,
+.register-btn:hover {
+  background: #45a049;
+}
+
+
+/* CRT 特效 */
+.crt-effect::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* background: linear-gradient(rgba(18, 16, 16, 0.1) 50%, rgba(0, 0, 0, 0.25) 50%),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); */
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* 状态栏 */
+/* .status-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 10px;
+  background: #333;
+  border: 3px solid #4a4a4a;
+  margin-bottom: 20px;
+} */
+
+
+
+.pixel-icon {
+  width: 24px;
+  height: 24px;
+  image-rendering: pixelated;
+}
+
+/* 地图视图 */
+/* .pixel-map {
+  display: grid;
+  grid-template-columns: repeat(10, 32px);
+  grid-template-rows: repeat(10, 32px);
+  gap: 4px;
+  background: #222;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.map-tile {
+  background: #333;
+  border: 2px solid #4a4a4a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.map-tile:hover {
+  background: #444;
+} */
+/* ✅ 让 pixel-map 变成一个 `flexbox` 容器 */
+.pixel-map {
+  display: flex;
+  flex-direction: column; /* 垂直排列 */
+  gap: 10px; /* 让每个成就文本框之间有间距 */
+  padding: 10px;
+  max-width: 80%; /* 限制最大宽度 */
+  margin: auto; /* 居中显示 */
+}
+
+/* ✅ 成就文本框样式 */
+.map-tile.achievement {
+  background: rgba(0, 0, 0, 0.8); /* 半透明黑色背景 */
+  color: #fff; /* 白色文字 */
+  padding: 10px 15px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  opacity: 0; /* 初始隐藏 */
+  transform: translateY(10px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+/* ✅ 当动画生效时，让它渐入 */
+.map-tile.achievement.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+.player-avatar {
+  font-size: 24px;
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* 任务看板 */
+/* .task-board {
+  background: #333;
+  padding: 15px;
+  border: 3px solid #4a4a4a;
+} */
+
+
+
+/* 添加 CSS */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 4px;
+  z-index: 1000;
+}
+
+.task-card.completed .task-details {
+  display: none !important;
+}
+
+.task-card.completed {
+  background-color: #2e2e2e;
+  padding: 10px;
+  border-radius: 8px;
+}
