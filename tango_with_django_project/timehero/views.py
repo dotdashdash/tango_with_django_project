@@ -18,7 +18,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse
 import json
-
+from django.contrib.auth import get_user_model
 
 def index(request):
     return render(request, 'index.html')
@@ -44,6 +44,18 @@ class PixelLoginView(LoginView):
 def dashboard_view(request):
     tasks = Task.objects.filter(user=request.user)  # 获取当前用户的任务
     tasks = process_tasks_for_dashboard(tasks) 
+    # user= request.user
+    # next_level_threshold = (user.level) * 100 
+    # # 也可用更复杂公式：level_n 需要 n×100 经验，总和递增
+
+    # exp_left = next_level_threshold - user.exp
+    # if exp_left < 0:
+    #     exp_left = 0  # 如果用户超出该等级所需经验，则为 0
+
+    # context = {
+    #     "tasks": tasks,
+    #     "exp_left": exp_left,  # 把这个传 *给模板
+    # }
     return render(request, "dashboard.html")
 
 class PixelLogoutView(LogoutView):
@@ -203,3 +215,82 @@ def ajax_check_email(request):
     if email and User.objects.filter(email=email).exists():
         return JsonResponse({'exists': True})
     return JsonResponse({'exists': False})
+
+def get_ranking(request):
+    """
+    返回前 10 名 + 当前用户的排名（若不在前 10）。
+    JSON 数据格式示例：
+    [
+      {"username": "aaa", "experience": 120, "rank": 1, "is_current_user": false},
+      ...
+      {"username": "...", "experience": 0, "rank": -1, "is_ellipsis": true},
+      {"username": "testuser", "experience": 20, "rank": 13, "is_current_user": true}
+    ]
+    """
+    current_user = request.user if request.user.is_authenticated else None
+
+    # 1) 获取所有用户
+    User = get_user_model()
+    all_users = User.objects.all()
+
+    # 2) 合并用户和排行榜经验
+    user_experiences = []
+    for user in all_users:
+        try:
+            cr = CompetitionRanking.objects.get(user=user)
+            exp = cr.experience
+        except CompetitionRanking.DoesNotExist:
+            exp = 0  # 没有记录则视为 0
+        user_experiences.append((user, exp))
+
+    # 3) 按经验值降序排序
+    user_experiences.sort(key=lambda x: x[1], reverse=True)
+
+    # 4) 计算排名
+    data = []
+    rank = 1
+    for (user, exp) in user_experiences:
+        data.append({
+            "username": user.username,
+            "experience": exp,
+            "rank": rank,
+            # 如果要突出显示当前登录用户
+            "is_current_user": (current_user == user),
+            "is_ellipsis": False,  # 是否是省略号行
+        })
+        rank += 1
+
+    # 5) 只取前 10
+    top_10 = data[:10]
+
+    # 检查当前用户是否在前 10
+    if current_user:
+        user_in_top_10 = any(d["is_current_user"] for d in top_10)
+        if not user_in_top_10:
+            # 1. 找到当前用户所在条目
+            try:
+                current_user_entry = next(d for d in data if d["is_current_user"])
+            except StopIteration:
+                current_user_entry = None
+
+            # 2. 在 top_10 后面插入 “...省略” 占位 + 当前用户
+            if current_user_entry:
+                top_10.append({
+                    "username": "...",
+                    "experience": 0,
+                    "rank": -1,
+                    "is_current_user": False,
+                    "is_ellipsis": True,
+                })
+                top_10.append(current_user_entry)
+
+    # 返回最终列表
+    return JsonResponse(top_10, safe=False)
+
+
+from django.utils.timezone import now
+
+def get_competition_timer(request):
+    """ 获取本周竞赛倒计时 """
+    end_time = now() + timedelta(days=7 - now().weekday())  # 计算本周日结束时间
+    return JsonResponse({"end_date": end_time.isoformat()})

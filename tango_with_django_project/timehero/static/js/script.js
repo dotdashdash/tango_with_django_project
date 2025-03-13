@@ -438,3 +438,83 @@ function forceISOFormat(input) {
         input.value = date.toISOString().slice(0, 16);
     }
 }
+function updateRanking() {
+    fetch('/api/get_ranking/')
+        .then(response => response.json())
+        .then(data => {
+            let table = document.getElementById("ranking-table");
+            table.innerHTML = "";  // 清空当前内容
+
+            data.forEach((user, index) => {
+                let row = `<tr>
+            <td>${index + 1}</td>
+            <td>${user.username}</td>
+            <td>${user.experience} XP</td>
+        </tr>`;
+                table.innerHTML += row;
+            });
+        });
+}
+setInterval(updateRanking, 5000);  // 每 5 秒更新
+updateRanking();
+function updateCountdown() {
+    fetch('/api/get_competition_timer/')
+        .then(response => response.json())
+        .then(data => {
+            let endTime = new Date(data.end_date);
+            let now = new Date();
+            let timeDiff = endTime - now;
+
+            let days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+            document.getElementById("countdown").innerHTML =days + " days left!";
+        });
+}
+setInterval(updateCountdown, 60000);  // 每分钟刷新
+updateCountdown();
+
+document.querySelectorAll('.complete-task-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const taskId = btn.dataset.taskId;
+        fetch(`/tasks/${taskId}/complete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log('Task complete response:', data);
+        // 可以刷新页面或更新前端状态
+        })
+        .catch(err => console.error('Error completing task:', err));
+    });
+});
+
+function updateRanking() {
+    fetch('/api/get_ranking/')
+    .then(response => response.json())
+    .then(data => {
+        let table = document.getElementById("ranking-table");
+        table.innerHTML = "";  // 清空当前内容
+
+        data.forEach(entry => {
+            if (entry.is_ellipsis) {
+                // 显示省略号行
+                let row = `<tr><td>...</td><td>...</td><td>...</td></tr>`;
+                table.innerHTML += row;
+            } else {
+                // 普通用户行
+                // 如果要突出显示当前用户
+                let highlightClass = entry.is_current_user ? 'highlight-row' : '';
+                let row = `<tr class="${highlightClass}">
+                    <td>${entry.rank}</td>
+                    <td>${entry.username}</td>
+                    <td>${entry.experience} XP</td>
+                </tr>`;
+                table.innerHTML += row;
+            }
+        });
+    });
+}
+setInterval(updateRanking, 5000);
+updateRanking();

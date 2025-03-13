@@ -27,3 +27,10 @@ def check_achievements(user):
         if eval(condition, None, {'user': user}):
             progress.unlocked = True
             progress.save()
+
+@receiver(post_save, sender=User)
+def sync_experience_to_competition(sender, instance, **kwargs):
+    """当 User.exp 变化时，同步到 CompetitionRanking"""
+    ranking, created = CompetitionRanking.objects.get_or_create(user=instance)
+    ranking.experience = instance.exp  # 让 experience 跟 user.exp 一致
+    ranking.save()

@@ -252,7 +252,7 @@ header {
 }
 
 .task-card.completed {
-  background-color: #2e2e2e;
+  background-color: rgba(125, 80, 127, 0.566);
   padding: 10px;
   border-radius: 8px;
 }

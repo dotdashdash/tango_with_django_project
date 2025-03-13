@@ -35,7 +35,7 @@ body {
     /* background: #f09fde; */
     padding: 10px 20px;
     font-size: 20px;
-    /* font-weight: bold; */
+    font-weight: bold;
     width: 100%;
     /* border-bottom: 2px solid #444; */
     box-sizing: border-box;
@@ -375,3 +375,21 @@ body {
     max-height: 200px;
     overflow-y: auto;
 }
+/* 让表格无边线、合并单元格 */
+.table {
+    border-collapse: collapse;
+    width: 100%;
+}
+.table th, .table td {
+    border: none;          /* 去掉单元格边线 */
+    padding: 8px;          /* 给点内边距，避免文字贴边 */
+    text-align: left;      /* 文本左对齐，可按需修改 */
+}
+
+/* 高亮 */
+.highlight-row {
+    background-color: hsla(60, 9%, 51%, 0.518) !important;
+    font-weight: bold !important;
+    margin: 2px 0;      
+  }
+  

@@ -43,6 +43,9 @@ urlpatterns = [
     path('password-reset/security-question/', password_reset_security_question_view, name='password_reset_security_question'),
     path('api/ajax_check_email/', ajax_check_email, name='ajax_check_email'),
     path('index/', index, name='index'),
+    
+    path('api/get_ranking/', get_ranking, name='get_ranking'),
+    path('api/get_competition_timer/', get_competition_timer, name='get_competition_timer'),
 
 
     # path("achievements/", achievement_list, name="achievement-list"),

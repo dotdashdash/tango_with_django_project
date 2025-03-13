@@ -112,3 +112,34 @@ class AchievementProgress(models.Model):
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
     unlocked = models.BooleanField(default=False)
     unlocked_at = models.DateTimeField(null=True, blank=True)
+    
+class Competition(models.Model):
+    """ 只有一个竞赛，每周清零经验 """
+    start_date = models.DateTimeField(default=now)
+    end_date = models.DateTimeField(default=now() + timedelta(days=7))  # 每周结束
+    is_active = models.BooleanField(default=True)  # 竞赛始终保持开启
+
+    def __str__(self):
+        return f"Weekly Competition ({self.start_date.date()} - {self.end_date.date()})"
+
+class CompetitionRanking(models.Model):
+    """ 用户经验排名，每周自动清零经验 """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    experience = models.IntegerField(default=0)  # 本周经验值
+    rank = models.IntegerField(default=0)  # 排名
+
+    class Meta:
+        unique_together = ('user',)  # 确保用户在竞赛中唯一
+
+    def __str__(self):
+        return f"{self.user.username} - {self.experience} XP (Rank {self.rank})"
+
+class Badge(models.Model):
+    """ 竞赛奖励徽章 """
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    icon = models.CharField(max_length=255)  # 存储徽章图片路径
+    ranking_threshold = models.IntegerField()  # 多少名以内可解锁
+
+    def __str__(self):
+        return self.name

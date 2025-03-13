@@ -16,6 +16,8 @@ def evaluate_difficulty(title, start_date, due_date, priority):
     keywords_medium = ["exercise", "meeting", "cleaning", "shopping"]
 
     difficulty = 1  # 默认难度为 Easy
+    if not start_date or not due_date:
+        return difficulty
 
     # 计算任务持续时间（分钟）
     if isinstance(start_date, str):
@@ -189,3 +191,22 @@ def get_user_achievements(user):
         }
         for ap in achievements
     ]
+    
+def update_competition_ranking(user, exp_gained):
+    """ 任务完成后更新排行榜经验 """
+    ranking, created = CompetitionRanking.objects.get_or_create(user=user)
+
+    ranking.experience += exp_gained
+    ranking.save()
+
+    # 更新所有用户排名
+    all_rankings = CompetitionRanking.objects.all().order_by('-experience')
+    for index, rank in enumerate(all_rankings, start=1):
+        rank.rank = index
+        rank.save()
+        
+from .models import CompetitionRanking
+
+def reset_weekly_ranking():
+    """ 每周清零排行榜经验 """
+    CompetitionRanking.objects.all().update(experience=0, rank=0)

@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="{% static 'css/pixel.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    
+
 
 
 </head>
@@ -32,6 +32,7 @@
         <div class="status-item">
             <img src="{% static 'sprites/coins.png' %}" class="pixel-icon">
             <span id="exp">{{ user.exp }}</span> EXP
+            <!-- <span id="exp_left">{{ exp_left }}</span> EXP to next level! -->
         </div>
         <!-- 🚀 Logout 按钮 -->
         <div class="status-item logout">
@@ -142,75 +143,82 @@
         <div id="leaderboard-container" class="task-board">
             <h2 class="pixel-title">🏆 Leaderboard</h2>
             <ul class="leaderboard">
-                <ul>
+                {% comment %} <ul>
                     <li>1. User A - 500 XP</li>
                     <li>2. User B - 450 XP</li>
                     <li>3. User C - 400 XP</li>
-                </ul>
-
-
-                <!-- “查看全部成就” 按钮，放在 Leaderboard 右下角 -->
+                </ul> {% endcomment %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>exp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-table"></tbody>
+                </table>
+                <div id="countdown"></div>
                 <button class="achievements-button">Your Achievements</button>
+            </div>
+                <!-- 右下角成就展示区域 -->
+                <div class="achievements-popup-container">
+                    <div class="achievements-popup"></div>
+                    <div class="achievements-list-container">
+                        <div class="achievements-list"></div>
+                    </div>
+                </div>
+
+
+
         </div>
 
-        <!-- 右下角成就展示区域 -->
-        <div class="achievements-popup-container">
-            <div class="achievements-popup"></div>
-            <div class="achievements-list-container">
-                <div class="achievements-list"></div>
+        <!-- 任务创建模态框 -->
+        <div id="taskModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeTaskModal()">&times;</span>
+                <h2>Create New Task</h2>
+                <form id="taskForm" method="POST" action="{% url 'task-list' %}">
+                    {% csrf_token %}
+
+                    <label>Task Title:</label>
+                    <input type="text" id="taskTitle" name="title" required oninput="predictDifficulty()">
+
+                    <label>Start Time:</label>
+                    <input type="datetime-local" id="taskStartDate" name="start_date">
+
+                    <label>Due Date:</label>
+                    <input type="datetime-local" id="taskDueDate" name="due_date" onchange="calculateDuration()">
+
+                    <label for="taskPriority">High Priority:</label>
+                    <input type="checkbox" id="taskPriority" name="priority" value="true">
+
+                    <label>Difficulty:</label>
+                    <span id="difficultyDisplay">Easy</span>
+                    <input type="hidden" id="taskDifficulty" name="difficulty">
+
+                    <div class="tags-container">
+                        <label>Tags:</label>
+                        <input type="text" id="taskTags" name="tags" placeholder="e.g. work, study, exercise">
+                    </div>
+
+                    <label>Checklist:</label>
+                    <textarea id="taskChecklist" name="checklist" placeholder="e.g. task 1, task 2, task 3"></textarea>
+
+                    <label>Notes:</label>
+                    <textarea id="taskNotes" name="notes" placeholder="Additional notes..."></textarea>
+                    <button type="submit" class="pixel-btn">Submit</button>
+                </form>
             </div>
         </div>
 
-
-
-    </div>
-
-    <!-- 任务创建模态框 -->
-    <div id="taskModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" onclick="closeTaskModal()">&times;</span>
-            <h2>Create New Task</h2>
-            <form id="taskForm" method="POST" action="{% url 'task-list' %}">
-                {% csrf_token %}
-
-                <label>Task Title:</label>
-                <input type="text" id="taskTitle" name="title" required oninput="predictDifficulty()">
-
-                <label>Start Time:</label>
-                <input type="datetime-local" id="taskStartDate" name="start_date">
-
-                <label>Due Date:</label>
-                <input type="datetime-local" id="taskDueDate" name="due_date" onchange="calculateDuration()">
-
-                <label for="taskPriority">High Priority:</label>
-                <input type="checkbox" id="taskPriority" name="priority" value="true">
-
-                <label>Difficulty:</label>
-                <span id="difficultyDisplay">Easy</span>
-                <input type="hidden" id="taskDifficulty" name="difficulty">
-
-                <div class="tags-container">
-                    <label>Tags:</label>
-                    <input type="text" id="taskTags" name="tags" placeholder="e.g. work, study, exercise">
-                </div>
-
-                <label>Checklist:</label>
-                <textarea id="taskChecklist" name="checklist" placeholder="e.g. task 1, task 2, task 3"></textarea>
-
-                <label>Notes:</label>
-                <textarea id="taskNotes" name="notes" placeholder="Additional notes..."></textarea>
-                <button type="submit" class="pixel-btn">Submit</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- JavaScript -->
-    <script src="{% static 'js/script.js' %}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script>
-        flatpickr("#taskStartDate", { enableTime: true, dateFormat: "Y-m-d H:i", locale: "en" });
-        flatpickr("#taskDueDate", { enableTime: true, dateFormat: "Y-m-d H:i", locale: "en" });
-    </script>
+        <!-- JavaScript -->
+        <script src="{% static 'js/script.js' %}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script>
+            flatpickr("#taskStartDate", { enableTime: true, dateFormat: "Y-m-d H:i", locale: "en" });
+            flatpickr("#taskDueDate", { enableTime: true, dateFormat: "Y-m-d H:i", locale: "en" });
+        </script>
 
 
 </body>

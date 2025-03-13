@@ -4,7 +4,7 @@ body {
     background: #1a1a1a;
     color: rgba(236, 43, 243, 0.616);
     font-family: 'VT323', monospace;
-    font-size: 16px;
+    font-size: 24px;
     margin: 0;
     padding: 0;
 }
@@ -182,8 +182,8 @@ body {
 }
 
 .task-card {
-
-    background: #222;
+    background:rgba(125, 80, 127, 0.566);
+    /* background: #222; */
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.2);
@@ -200,7 +200,7 @@ body {
     font-size: 22px;
     /* ✅ 增大标题字体 */
     font-weight: bold;
-    color: #ffffff;
+    color: rgb(198, 255, 209);
     margin-bottom: 10px;
 }
 
@@ -375,3 +375,21 @@ body {
     max-height: 200px;
     overflow-y: auto;
 }
+/* 让表格无边线、合并单元格 */
+.table {
+    border-collapse: collapse;
+    width: 100%;
+}
+.table th, .table td {
+    border: none;          /* 去掉单元格边线 */
+    padding: 8px;          /* 给点内边距，避免文字贴边 */
+    text-align: left;      /* 文本左对齐，可按需修改 */
+}
+
+/* 高亮 */
+.highlight-row {
+    background-color: rgb(198, 255, 209) !important;
+    font-weight: bold !important;
+    margin: 2px 0;      
+  }
+  

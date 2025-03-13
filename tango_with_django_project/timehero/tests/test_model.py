@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.utils.timezone import now
 from timehero.models import User, Task, Achievement, AchievementProgress
-
+from datetime import datetime, timedelta
 class UserModelTest(TestCase):
     def setUp(self):
         """ 创建测试用户 """
@@ -35,14 +35,16 @@ class TaskModelTest(TestCase):
             user=self.user,
             title="Test Task",
             description="This is a test task",
-            difficulty=2,
+            difficulty=3,
+            start_date=datetime.now(),
+            due_date=datetime.now() + timedelta(days=1),  #
             is_completed=False
         )
 
     def test_task_creation(self):
         """ 测试任务创建 """
         self.assertEqual(self.task.title, "Test Task")
-        self.assertEqual(self.task.difficulty, 2)
+        self.assertEqual(self.task.difficulty, 3)
         self.assertFalse(self.task.is_completed)
 
     def test_complete_task(self):
@@ -50,17 +52,23 @@ class TaskModelTest(TestCase):
         self.task.is_completed = True
         self.task.save()
         self.assertTrue(self.task.is_completed)
+    def test_mark_task_completed(self):
+        """ 测试任务标记完成 """
+        self.task.is_completed = True
+        self.task.save()
+        self.assertTrue(Task.objects.get(id=self.task.id).is_completed)
 
 
-# class AchievementModelTest(TestCase):
-#     def setUp(self):
-#         """ 创建测试用户和成就 """
-#         self.user = User.objects.create_user(username="achiever", email="achieve@example.com", password="testpass")
-#         self.achievement = Achievement.objects.create(name="First Task", description="Complete your first task")
 
-#     def test_achievement_progress(self):
-#         """ 测试用户成就进度 """
-#         progress = AchievementProgress.objects.create(user=self.user, achievement=self.achievement, unlocked=True, unlocked_at=now())
-#         self.assertTrue(progress.unlocked)
-#         self.assertEqual(progress.achievement.name, "First Task")
+class AchievementModelTest(TestCase):
+    def setUp(self):
+        """ 创建测试用户和成就 """
+        self.user = User.objects.create_user(username="achiever", email="achieve@example.com", password="testpass")
+        self.achievement = Achievement.objects.create(name="First Task", description="Complete your first task")
+
+    def test_achievement_progress(self):
+        """ 测试用户成就进度 """
+        progress = AchievementProgress.objects.create(user=self.user, achievement=self.achievement, unlocked=True, unlocked_at=now())
+        self.assertTrue(progress.unlocked)
+        self.assertEqual(progress.achievement.name, "First Task")
 
