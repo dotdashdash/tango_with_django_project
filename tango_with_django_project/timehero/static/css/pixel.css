@@ -1,8 +1,7 @@
-/* 基础像素风格 */
 body {
   background: #f4f0f0;
   /* color: #8bc34a; */
-  color:rgb(198, 255, 209);
+  color: rgb(198, 255, 209);
   font-family: 'Press Start 2P', cursive;
   font-size: 16px;
   line-height: 1.5;
@@ -24,31 +23,34 @@ header {
   font-size: 20px;
   overflow: hidden;
 }
+
 .timehero-title {
   font-weight: bold;
-  color: rgb(126, 80, 137); /* 文字颜色 */
-  font-size: 45px; /* 字体大小 */
-  text-shadow: 
-      3px 3px 0px rgb(198, 255, 209),  /* 右下 */
-      -3px -3px 0px black, /* 左上 */
-      -3px 3px 0px black,  /* 左下 */
-      3px -3px 0px black;  /* 右上 */
+  color: rgb(126, 80, 137);
+  font-size: 45px;
+  text-shadow:
+    3px 3px 0px rgb(198, 255, 209),
+    -3px -3px 0px black,
+    -3px 3px 0px black,
+    3px -3px 0px black;
 }
+
 .timehero-center {
   font-weight: bold;
-  color:rgb(198, 255, 209);
+  color: rgb(198, 255, 209);
   font-size: 20px;
-  text-shadow: 
-      3px 3px 0px rgb(126, 80, 137),  /* 右下 */
-      -3px -3px 0px black, /* 左上 */
-      -3px 3px 0px black,  /* 左下 */
-      3px -3px 0px black;  /* 右上 */
+  text-shadow:
+    3px 3px 0px rgb(126, 80, 137),
+    -3px -3px 0px black,
+    -3px 3px 0px black,
+    3px -3px 0px black;
 }
+
 .pixel-container {
-  background-image: url('/static/image/loginbox.webp'); /* 确保路径正确 */
-  background-size: cover;  /* 让背景铺满整个容器 */
-  background-position: center;  /* 让背景居中 */
-  background-repeat: no-repeat;  /* 不重复 */
+  background-image: url('/static/image/loginbox.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   /* opacity: 0.6; */
 
   display: flex;
@@ -65,8 +67,10 @@ header {
   /* background: transparent !important; */
 }
 
-.pixel-btn,.complete-task-btn,
-.toggle-completed-btn,.achievements-button {
+.pixel-btn,
+.complete-task-btn,
+.toggle-completed-btn,
+.achievements-button {
   display: block;
   margin: 10px auto;
   /* width: 100%; */
@@ -83,20 +87,21 @@ header {
 
 }
 
-.pixel-btn:hover,.achievements-button:hover {
+.pixel-btn:hover,
+.achievements-button:hover {
   background: rgba(236, 43, 243, 0.616);
   transform: translateY(-1px);
 }
 
 .login-box {
   background: rgba(255, 255, 255, 0.9);
-  /* 半透明背景 */
+
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   font-family: 'Press Start 2P', cursive;
   width: 320px;
-  /* 设置固定宽度，避免变形 */
+
   text-align: center;
   box-sizing: border-box;
   margin: 50 auto;
@@ -106,7 +111,6 @@ header {
 .login-box input {
   display: block;
   width: 100%;
-  /* 让输入框铺满 */
   padding: 12px;
   margin: 10px 0;
   font-size: 16px;
@@ -123,7 +127,6 @@ header {
   font-family: "Press Start 2P", cursive;
   /* background: #4CAF50; */
   background: white;
-  /* 统一绿色 */
   color: rgba(125, 80, 127, 0.566);
   padding: 12px;
   margin: 10px auto;
@@ -131,7 +134,6 @@ header {
   cursor: pointer;
   text-transform: uppercase;
   width: 80%;
-  /* 让按钮占满输入框的宽度 */
   font-size: 16px;
   display: block;
   border: 2px solid black;
@@ -159,51 +161,12 @@ header {
   z-index: 999;
 }
 
-/* 状态栏 */
-/* .status-bar {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  padding: 10px;
-  background: #333;
-  border: 3px solid #4a4a4a;
-  margin-bottom: 20px;
-} */
-
-
-
 .pixel-icon {
   width: 24px;
   height: 24px;
   image-rendering: pixelated;
 }
 
-/* 地图视图 */
-/* .pixel-map {
-  display: grid;
-  grid-template-columns: repeat(10, 32px);
-  grid-template-rows: repeat(10, 32px);
-  gap: 4px;
-  background: #222;
-  padding: 10px;
-  margin-bottom: 20px;
-}
-
-.map-tile {
-  background: #333;
-  border: 2px solid #4a4a4a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.map-tile:hover {
-  background: #444;
-} */
-/* ✅ 让 pixel-map 变成 flexbox 容器 */
 
 
 .player-avatar {
@@ -225,16 +188,7 @@ header {
   }
 }
 
-/* 任务看板 */
-/* .task-board {
-  background: #333;
-  padding: 15px;
-  border: 3px solid #4a4a4a;
-} */
 
-
-
-/* 添加 CSS */
 .toast {
   position: fixed;
   bottom: 20px;

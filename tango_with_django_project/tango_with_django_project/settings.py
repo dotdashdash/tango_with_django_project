@@ -118,20 +118,20 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR,"timehero","static"),  # 指定 `static` 目录
+    os.path.join(BASE_DIR,"timehero","static"), 
 ]
 STATIC_ROOT=os.path.join(BASE_DIR,"staticfiles")
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTH_USER_MODEL = 'timehero.User'  # 替换为你的应用名（timehero）和模型名（User）
+AUTH_USER_MODEL = 'timehero.User'  
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',  # 只支持 JSON
+        'rest_framework.renderers.JSONRenderer',  
     ]
 }
-LOGIN_REDIRECT_URL = '/dashboard/'  # 用户登录后直接跳转到dashboard
-LOGOUT_REDIRECT_URL = '/index/'  # 退出后回到首页
+LOGIN_REDIRECT_URL = '/dashboard/'  
+LOGOUT_REDIRECT_URL = '/index/'  
 ALLOWED_HOSTS = ['dotdashdash.pythonanywhere.com','127.0.0.1']

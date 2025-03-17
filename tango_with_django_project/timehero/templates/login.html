@@ -4,16 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登录</title>
+    <title>Login</title>
     <link rel="stylesheet" href="{% static 'css/pixel.css' %}">
 </head>
 <body>
-    <h2>用户登录</h2>
+    <h2>Login</h2>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">登录</button>
+        <button type="submit">Login</button>
     </form>
-    <a href="{% url 'signup' %}">没有账号？注册</a>
+    <a href="{% url 'signup' %}">Not a existing user？Register</a>
 </body>
 </html>

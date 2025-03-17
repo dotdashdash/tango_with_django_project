@@ -6,7 +6,6 @@ from .models import *
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        # 初始成就进度
         for achievement in Achievement.objects.filter(unlock_condition__lte=instance.level):
             AchievementProgress.objects.create(
                 user=instance, 
@@ -18,7 +17,7 @@ def check_level_up(user):
     if user.exp >= exp_needed:
         user.level += 1
         user.exp -= exp_needed
-        user.hp = min(user.hp + 1, 5)  # 最大HP为5
+        user.hp = min(user.hp + 1, 5)
         user.save()
 
 def check_achievements(user):
@@ -30,7 +29,7 @@ def check_achievements(user):
 
 @receiver(post_save, sender=User)
 def sync_experience_to_competition(sender, instance, **kwargs):
-    """当 User.exp 变化时，同步到 CompetitionRanking"""
+    """when user experience is updated, update competition ranking"""
     ranking, created = CompetitionRanking.objects.get_or_create(user=instance)
-    ranking.experience = instance.exp  # 让 experience 跟 user.exp 一致
+    ranking.experience = instance.exp 
     ranking.save()

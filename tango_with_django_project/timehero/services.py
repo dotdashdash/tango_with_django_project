@@ -7,19 +7,16 @@ from django.utils.timezone import now
 
 def evaluate_difficulty(title, start_date, due_date, priority):
     """
-    计算任务难度：
-    - 关键词匹配（任务名称）
-    - 任务持续时间（due_date - start_date）
-    - 任务优先级
+    calculate the difficulty of a task based on its title, start date, due date, and priority
     """
     keywords_hard = ["report", "study", "presentation", "deadline", "research"]
     keywords_medium = ["exercise", "meeting", "cleaning", "shopping"]
 
-    difficulty = 1  # 默认难度为 Easy
+    difficulty = 1  # default easy
     if not start_date or not due_date:
         return difficulty
 
-    # 计算任务持续时间（分钟）
+    # calculate duration in minutes
     if isinstance(start_date, str):
         start_date = datetime.fromisoformat(start_date)
     if isinstance(due_date, str):
@@ -27,19 +24,19 @@ def evaluate_difficulty(title, start_date, due_date, priority):
 
     duration = int((due_date - start_date).total_seconds() // 60)
 
-    # 关键词匹配
+    # match keywords to evaluate difficulty
     if any(word in title.lower() for word in keywords_hard):
         difficulty = 3
     elif any(word in title.lower() for word in keywords_medium):
         difficulty = 2
 
-    # 时间影响难度
+    # time-based evaluation
     if duration > 120:
         difficulty = max(difficulty, 3)
     elif duration > 60:
         difficulty = max(difficulty, 2)
 
-    # 高优先级任务增加难度
+    # high priority tasks are harder
     if priority:
         difficulty = min(3, difficulty + 1)
 
@@ -48,17 +45,14 @@ def evaluate_difficulty(title, start_date, due_date, priority):
 
 def complete_task(task):
     """
-    任务完成后：
-    - 标记任务完成
-    - 经验值一直累积
-    - 检查用户是否升级
+    after a task is completed, update user's experience and check if the user has leveled up
     """
     # Task = apps.get_model('timehero', 'Task')
     task.is_completed = True
     task.save()
 
     user = task.user
-    user.exp += task.difficulty * 10  # ✅ 经验值不会被扣除
+    user.exp += task.difficulty * 10  # ✅ accumulate experience
     user.save()
 
     new_level, newly_unlocked, all_achievements = check_level_up(user)
@@ -72,7 +66,7 @@ def complete_task(task):
     return {
         "status": "completed",
         "new_level": new_level if new_level else user.level,
-        "exp": user.exp,  # ✅ 确保返回的是累积经验值
+        "exp": user.exp,
         "unlocked_features": newly_unlocked,
         "all_achievements": all_achievements,
     }
@@ -81,15 +75,10 @@ def complete_task(task):
 def check_level_up(user):
     Achievement = apps.get_model(
         "timehero", "Achievement"
-    )  # ✅ 通过 `apps.get_model()` 访问模型
+    )  # apps.get_model('app_name', 'model_name')
     AchievementProgress = apps.get_model("timehero", "AchievementProgress")
 
-    """
-    计算玩家的等级（逐级累积需求：1->2 需要 100, 2->3 需要 200, etc.）
-    并返回解锁的奖励列表
-    """
-
-    # 在方法里内置所有等级对应的奖励，若超出可自行扩充
+    # define level-up rewards
     LEVEL_REWARDS = {
         2: "🌱 You've reached Level 2! Good start!",
         3: "🌿 Level 3 unlocked! Keep going!",
@@ -112,14 +101,13 @@ def check_level_up(user):
         20: "⚔ Level 20: Boss Mode Unlocked! Special high-reward tasks appear.",
     }
 
-    # 计算“升到 level 级”所需的总经验 = (level-1)*level/2 * 100
     old_level = user.level
     new_level = new_level = math.floor(user.exp / 100) + 1
-    newly_unlocked = []  # 存储本次升级解锁的成就
+    newly_unlocked = []  # save newly unlocked achievements
 
-    # 遍历 `LEVEL_REWARDS`，判断是否解锁新成就
+    # check if user has leveled up
     for lvl, reward in LEVEL_REWARDS.items():
-        if old_level < lvl <= new_level:  # ✅ 只有从旧等级到新等级之间的才解锁
+        if old_level < lvl <= new_level:  # level changed
             achievement, created = Achievement.objects.get_or_create(
                 name=reward, unlock_condition=int(lvl)
             )
@@ -136,7 +124,7 @@ def check_level_up(user):
                         "name": achievement.name,
                         "unlocked_at": progress.unlocked_at.strftime("%Y-%m-%d %H:%M"),
                     }
-                )  # ✅ 只存储新解锁的成就
+                )  # only save newly unlocked achievements
     all_achievements = list(
         Achievement.objects.filter(
             achievementprogress__user=user, achievementprogress__unlocked=True
@@ -145,7 +133,6 @@ def check_level_up(user):
     if new_level > old_level:
         user.level = new_level
         user.save()
-    # return new_level, newly_unlocked, all_achievements  # ✅ 必须返回 3 个
 
     # return old_level, []
     return new_level, newly_unlocked, all_achievements
@@ -153,10 +140,9 @@ def check_level_up(user):
 
 def process_tasks_for_dashboard(tasks):
     """
-    处理任务数据，确保 tags、checklist 以列表形式返回，避免 Django 模板 split 过滤器问题
+    deal with task data to be displayed on the dashboard
     """
     for task in tasks:
-        # 去掉多余空格，确保 tags、checklist 是干净的列表
         task.tags_list = (
             [tag.strip() for tag in task.tags.split(",")] if task.tags else []
         )
@@ -171,14 +157,13 @@ def process_tasks_for_dashboard(tasks):
 
 
 def get_user_achievements(user):
-    """获取当前用户解锁的成就"""
+    """get current user's unlocked achievements"""
     AchievementProgress = apps.get_model("timehero", "AchievementProgress")
     achievements = AchievementProgress.objects.filter(
         user=user,
         unlocked=True,
         # ).values_list("achievement__name", flat=True)
     ).select_related("achievement")
-    # return list(achievements)  # 返回字符串列表
     return [
         {
             "name": ap.achievement.name,
@@ -187,26 +172,29 @@ def get_user_achievements(user):
                 ap.unlocked_at.strftime("%Y-%m-%d %H:%M")
                 if ap.unlocked_at
                 else "unknown time"
-            ),  # 返回格式化时间
+            ), 
         }
         for ap in achievements
     ]
-    
+
+
 def update_competition_ranking(user, exp_gained):
-    """ 任务完成后更新排行榜经验 """
+    """after a task is completed, update user's experience and check if the user has leveled up"""
     ranking, created = CompetitionRanking.objects.get_or_create(user=user)
 
     ranking.experience += exp_gained
     ranking.save()
 
-    # 更新所有用户排名
-    all_rankings = CompetitionRanking.objects.all().order_by('-experience')
+    # renew ranking
+    all_rankings = CompetitionRanking.objects.all().order_by("-experience")
     for index, rank in enumerate(all_rankings, start=1):
         rank.rank = index
         rank.save()
-        
+
+
 from .models import CompetitionRanking
 
+
 def reset_weekly_ranking():
-    """ 每周清零排行榜经验 """
+    """clear all experience and ranking for weekly competition"""
     CompetitionRanking.objects.all().update(experience=0, rank=0)

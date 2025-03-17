@@ -70,29 +70,29 @@ class Task(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     difficulty = models.IntegerField(default=1)  
-    # duration = models.IntegerField(default=30)  # 预计完成时间（分钟）
-    priority = models.BooleanField(default=False)  # 是否高优先级
+    # duration = models.IntegerField(default=30)  
+    priority = models.BooleanField(default=False)  
     is_completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    completed_count = models.IntegerField(default=0)  # 任务成功完成的次数
-    failed_count = models.IntegerField(default=0)  # 任务失败的次数
+    completed_count = models.IntegerField(default=0)  # dump
+    failed_count = models.IntegerField(default=0)  # dump
     start_date = models.DateTimeField(null=True, blank=True)
     due_date = models.DateTimeField(null=True, blank=True)
     position_x = models.IntegerField(null=True, blank=True)
     position_y = models.IntegerField(null=True, blank=True)
-    tags = models.CharField(max_length=255, blank=True, null=True)  # 用逗号分隔的标签
-    checklist = models.TextField(blank=True, null=True)  # 任务清单，每行一个项目
+    tags = models.CharField(max_length=255, blank=True, null=True)  
+    checklist = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True) 
 
 
     def complete_task(self):
-        """ 任务完成后，更新状态并检查升级 """
-        from .services import complete_task  # 避免循环导入
+        """ completed...then check if level up """
+        from .services import complete_task  # !circular import
         return complete_task(self)
 
     def save(self, *args, **kwargs):
         from .services import evaluate_difficulty
-        self.priority = self.priority if self.priority is not None else False  # 避免 None
+        self.priority = self.priority if self.priority is not None else False
         self.difficulty = evaluate_difficulty(self.title, self.start_date,self.due_date, self.priority)
         super().save(*args, **kwargs)
 
@@ -114,22 +114,20 @@ class AchievementProgress(models.Model):
     unlocked_at = models.DateTimeField(null=True, blank=True)
     
 class Competition(models.Model):
-    """ 只有一个竞赛，每周清零经验 """
     start_date = models.DateTimeField(default=now)
-    end_date = models.DateTimeField(default=now() + timedelta(days=7))  # 每周结束
-    is_active = models.BooleanField(default=True)  # 竞赛始终保持开启
+    end_date = models.DateTimeField(default=now() + timedelta(days=7))  # weekly
+    is_active = models.BooleanField(default=True)  # always active
 
     def __str__(self):
         return f"Weekly Competition ({self.start_date.date()} - {self.end_date.date()})"
 
 class CompetitionRanking(models.Model):
-    """ 用户经验排名，每周自动清零经验 """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    experience = models.IntegerField(default=0)  # 本周经验值
-    rank = models.IntegerField(default=0)  # 排名
+    experience = models.IntegerField(default=0)
+    rank = models.IntegerField(default=0)
 
     class Meta:
-        unique_together = ('user',)  # 确保用户在竞赛中唯一
+        unique_together = ('user',)  # user unique
 
     def __str__(self):
         return f"{self.user.username} - {self.experience} XP (Rank {self.rank})"
@@ -138,8 +136,8 @@ class Badge(models.Model):
     """ 竞赛奖励徽章 """
     name = models.CharField(max_length=100)
     description = models.TextField()
-    icon = models.CharField(max_length=255)  # 存储徽章图片路径
-    ranking_threshold = models.IntegerField()  # 多少名以内可解锁
+    icon = models.CharField(max_length=255)  
+    ranking_threshold = models.IntegerField()  
 
     def __str__(self):
         return self.name

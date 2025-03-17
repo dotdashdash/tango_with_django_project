@@ -23,13 +23,13 @@ from django.contrib.auth import get_user_model
 def index(request):
     return render(request, 'index.html')
 def register_view(request):
-    """用户注册"""
+    """register"""
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # 自动登录
-            messages.success(request, "注册成功，欢迎加入！")
+            login(request, user)  # login after register
+            messages.success(request, "Welcome！")
             return redirect("dashboard")
     else:
         form = UserRegisterForm()
@@ -40,29 +40,17 @@ class PixelLoginView(LoginView):
     authentication_form = UserLoginForm
     success_url = reverse_lazy('dashboard')
     
-@login_required  # 确保用户必须登录才能访问
+@login_required  # must login
 def dashboard_view(request):
-    tasks = Task.objects.filter(user=request.user)  # 获取当前用户的任务
+    tasks = Task.objects.filter(user=request.user)  # get all tasks
     tasks = process_tasks_for_dashboard(tasks) 
-    # user= request.user
-    # next_level_threshold = (user.level) * 100 
-    # # 也可用更复杂公式：level_n 需要 n×100 经验，总和递增
-
-    # exp_left = next_level_threshold - user.exp
-    # if exp_left < 0:
-    #     exp_left = 0  # 如果用户超出该等级所需经验，则为 0
-
-    # context = {
-    #     "tasks": tasks,
-    #     "exp_left": exp_left,  # 把这个传 *给模板
-    # }
     return render(request, "dashboard.html")
 
 class PixelLogoutView(LogoutView):
     next_page = reverse_lazy('index')
 
 class TaskViewSet(viewsets.ModelViewSet):
-    """ 任务视图集 """
+    """ tast api """
     serializer_class = TaskSerializer
     queryset = Task.objects.all()
     permission_classes = [permissions.IsAuthenticated]
@@ -70,18 +58,18 @@ class TaskViewSet(viewsets.ModelViewSet):
         return Task.objects.filter(user=self.request.user)
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-        """ 在创建任务时自动计算难度 """
+        """ use evaluate_difficulty to calculate difficulty """
         user = self.request.user if self.request.user.is_authenticated else None
         if user is None:
-            return Response({"error": "User must be authenticated"}, status=400)  # 防止匿名用户创建任务
+            return Response({"error": "User must be authenticated"}, status=400)
         
         priority = self.request.data.get("priority", "false").lower() == "true"
-        start_date = self.request.data.get("start_date", timezone.now())  # 默认当前时间
+        start_date = self.request.data.get("start_date", timezone.now())  # default to now
         due_date = self.request.data.get("due_date", None)
         
-        tags = self.request.data.get("tags", "").strip()  # 获取 tags
-        checklist = self.request.data.get("checklist", "").strip()  # 获取 checklist
-        notes = self.request.data.get("notes", "").strip()  # 获取 notes
+        tags = self.request.data.get("tags", "").strip() 
+        checklist = self.request.data.get("checklist", "").strip() 
+        notes = self.request.data.get("notes", "").strip()
 
 
         task = serializer.save(user=user, start_date=start_date, due_date=due_date, priority=priority,tags=tags,checklist=checklist,notes=notes)
@@ -90,16 +78,15 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def complete(self, request, pk=None):
-        """ 完成任务后计算经验值，并检查是否升级 """
+        """ calculate experience and check level up """
         task = self.get_object()
 
         if task.is_completed:
             return Response({"status": "already completed"}, status=400)
 
-        # ✅ 调用 `services.py` 里的 `complete_task`
+        # ✅ `services.py` `complete_task`
         result = complete_task(task)
 
-        # ✅ 确保 `Response` 直接返回 `result`
         return Response(result)  
 
 
@@ -116,10 +103,9 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 def user_achievements_view(request):
-    """ 返回 JSON 而不是模板 """
+    """ return json """
     user = request.user
     if not user.is_authenticated:
-        # 若要阻止匿名用户，直接返回空或 401
         return JsonResponse({"achievements": []}, status=200)
 
     achievements = get_user_achievements(user)
@@ -218,8 +204,7 @@ def ajax_check_email(request):
 
 def get_ranking(request):
     """
-    返回前 10 名 + 当前用户的排名（若不在前 10）。
-    JSON 数据格式示例：
+    return top 10 ranking
     [
       {"username": "aaa", "experience": 120, "rank": 1, "is_current_user": false},
       ...
@@ -229,24 +214,24 @@ def get_ranking(request):
     """
     current_user = request.user if request.user.is_authenticated else None
 
-    # 1) 获取所有用户
+    # 1) get all users
     User = get_user_model()
     all_users = User.objects.all()
 
-    # 2) 合并用户和排行榜经验
+    # 2)merge user and experience
     user_experiences = []
     for user in all_users:
         try:
             cr = CompetitionRanking.objects.get(user=user)
             exp = cr.experience
         except CompetitionRanking.DoesNotExist:
-            exp = 0  # 没有记录则视为 0
+            exp = 0  # no data=> 0
         user_experiences.append((user, exp))
 
-    # 3) 按经验值降序排序
+    # 3) descending sort
     user_experiences.sort(key=lambda x: x[1], reverse=True)
 
-    # 4) 计算排名
+    # 4) calculate rank
     data = []
     rank = 1
     for (user, exp) in user_experiences:
@@ -254,26 +239,25 @@ def get_ranking(request):
             "username": user.username,
             "experience": exp,
             "rank": rank,
-            # 如果要突出显示当前登录用户
+            # highlight current user
             "is_current_user": (current_user == user),
-            "is_ellipsis": False,  # 是否是省略号行
+            "is_ellipsis": False,
         })
         rank += 1
 
-    # 5) 只取前 10
     top_10 = data[:10]
 
-    # 检查当前用户是否在前 10
+    # check if current user is in top 10
     if current_user:
         user_in_top_10 = any(d["is_current_user"] for d in top_10)
         if not user_in_top_10:
-            # 1. 找到当前用户所在条目
+            # 1. find current user entry
             try:
                 current_user_entry = next(d for d in data if d["is_current_user"])
             except StopIteration:
                 current_user_entry = None
 
-            # 2. 在 top_10 后面插入 “...省略” 占位 + 当前用户
+            # 2. insert after 10th
             if current_user_entry:
                 top_10.append({
                     "username": "...",
@@ -284,13 +268,12 @@ def get_ranking(request):
                 })
                 top_10.append(current_user_entry)
 
-    # 返回最终列表
     return JsonResponse(top_10, safe=False)
 
 
 from django.utils.timezone import now
 
 def get_competition_timer(request):
-    """ 获取本周竞赛倒计时 """
-    end_time = now() + timedelta(days=7 - now().weekday())  # 计算本周日结束时间
+    """ return end date of the week """
+    end_time = now() + timedelta(days=7 - now().weekday())  # calculate end of the week
     return JsonResponse({"end_date": end_time.isoformat()})

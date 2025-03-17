@@ -1,10 +1,8 @@
-/* 全局字体设为像素风 */
 body {
     font-family: 'Press Start 2P', cursive;
     text-align: center;
 }
 
-/* 注册框 */
 .register-box {
     background: rgba(125, 80, 127, 0.566);
     padding: 15px;
@@ -13,20 +11,7 @@ body {
     width: 50%;
     margin: auto;
 }
-/* .register-box{
-    background: rgba(125, 80, 127, 0.566);
-    
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    font-family: 'Press Start 2P', cursive;
-    width: 320px;
-    text-align: center;
-    box-sizing: border-box;
-    margin: 50 auto;
-  
-  } */
-/* 输入框 */
+
 .register-box input {
     display: block;
     width: 80%;
@@ -36,12 +21,12 @@ body {
     border: 3px solid black;
 }
 .register-box label {
-    font-size: 12px;  /* 调小标签字体 */
+    font-size: 12px;  
     margin-bottom: 5px;
     display: block;
 }
 select#id_security_question.form-control {
-    all: unset; /* 彻底清除 Bootstrap 影响 */
+    all: unset;
     display: block;
     width: 80%;
     margin: 10px auto;
@@ -56,8 +41,6 @@ select#id_security_question.form-control {
     appearance: none;
 }
 
-
-/* 像素风按钮 */
 .pixel-btn {
     font-family: 'Press Start 2P', cursive;
     background: #4CAF50;
@@ -70,10 +53,9 @@ select#id_security_question.form-control {
     box-shadow: 3px 3px 0 black;
 }
 
-/* 密码提示 */
 .password-hint {
-    font-size: 10px;  /* 调小字体 */
-    color: #d32f2f;   /* 依然是红色，但更柔和 */
+    font-size: 10px;  
+    color: #d32f2f;   
     margin-top: 5px;
 }
 
@@ -98,19 +80,18 @@ select#id_security_question.form-control {
   }
   .existing-user-text {
     font-family: "Press Start 2P", cursive;
-    font-size: 10px;  /* 调整字号，让它小一点 */
+    font-size: 10px;  
     text-align: center;
-    margin-top: 10px; /* 调整间距，避免挤压 */
-    color: #7a7a7a; /* 让它稍微变浅，不会喧宾夺主 */
+    margin-top: 10px; 
+    color: #7a7a7a; 
 }
 
-/* 修改 "log in here" 的链接样式 */
 .existing-user-text a {
-    font-size: 10px; /* 让链接字号也跟随变小 */
+    font-size: 10px; 
     color: rgb(198, 255, 209);
-    text-decoration: none; /* 取消下划线 */
+    text-decoration: none; 
 }
 
 .existing-user-text a:hover {
-    text-decoration: underline; /* 悬停时再显示下划线 */
+    text-decoration: underline; 
 }

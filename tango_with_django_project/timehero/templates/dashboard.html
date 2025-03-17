@@ -3,7 +3,6 @@
 <html lang="en">
 
 <head>
-    <!-- 英国时间是utf多少？ -->
     <meta charset="UTF-4">
     <!-- <meta charset="UTF-8"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,7 +19,7 @@
 
 <body class="dashboard-container">
 
-    <!-- 状态栏 -->
+    <!-- head status bar -->
     <div class="status-bar">
         <div class="status-item">
             <img src="{% static 'sprites/hero.png' %}" class="pixel-icon">
@@ -34,7 +33,7 @@
             <span id="exp">{{ user.exp }}</span> EXP
             <!-- <span id="exp_left">{{ exp_left }}</span> EXP to next level! -->
         </div>
-        <!-- 🚀 Logout 按钮 -->
+        <!-- 🚀 Logout -->
         <div class="status-item logout">
             <form action="{% url 'logout' %}?next={% url 'index' %}" method="post">
                 {% csrf_token %}
@@ -49,7 +48,7 @@
             <button class="pixel-btn" onclick="openTaskModal()">➕ New Task</button>
 
             <div class="task-list-container">
-                <!-- 未完成任务 -->
+                <!-- incompleted task list -->
                 <div id="active-tasks">
                     <h3>📝 Active Tasks</h3>
                     <div class="task-list">
@@ -93,11 +92,11 @@
                     </div>
                 </div>
 
-                <!-- "已完成任务" 折叠按钮 -->
+                <!-- fold all the completed tasks -->
                 <button class="pixel-btn toggle-completed-btn" onclick="toggleCompletedTasks()">📂 Show Completed
                     Tasks</button>
 
-                <!-- 已完成任务 -->
+                <!-- completed tasks list -->
                 <div id="completed-tasks" style="display: none;">
                     <h3>✅ Completed Tasks</h3>
                     <div class="completed-task-list">
@@ -161,7 +160,7 @@
                 <div id="countdown"></div>
                 <button class="achievements-button">Your Achievements</button>
             </div>
-                <!-- 右下角成就展示区域 -->
+                <!-- achie popups -->
                 <div class="achievements-popup-container">
                     <div class="achievements-popup"></div>
                     <div class="achievements-list-container">
@@ -173,7 +172,7 @@
 
         </div>
 
-        <!-- 任务创建模态框 -->
+        <!-- create new task modal -->
         <div id="taskModal" class="modal" style="display: none;">
             <div class="modal-content">
                 <span class="close" onclick="closeTaskModal()">&times;</span>

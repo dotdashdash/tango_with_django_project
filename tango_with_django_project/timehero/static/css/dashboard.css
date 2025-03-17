@@ -1,4 +1,4 @@
-/* 🎨 全局样式 */
+/* 🎨 body */
 body {
     display: block;
     background: #1a1a1a;
@@ -8,7 +8,7 @@ body {
     margin: 0;
     padding: 0;
 }
-/* Dashboard 背景样式 */
+/* Dashboard  */
 .dashboard-container {
     position: relative;
     background: url('/static/image/backgd.webp') no-repeat center center fixed;
@@ -23,11 +23,11 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.5); /* 叠加半透明白色 */
+    background: rgba(255, 255, 255, 0.5); /* half transparent */
     z-index: -1;
 }
 
-/* 📌 顶部状态栏 */
+/* 📌 head status bar */
 .status-bar {
     display: flex;
     justify-content: space-between;
@@ -48,7 +48,7 @@ body {
     gap: 10px;
 }
 
-/* 🏗️ 主要内容区域布局 */
+/* 🏗️ main content */
 .main-content {
     display: flex;
     justify-content: space-between;
@@ -67,42 +67,42 @@ body {
     background: #f2dfec;;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    min-height: 400px; /* 保持高度一致 */
+    min-height: 400px; /* height align */
 }
 
-/* 让排行榜中的项目左对齐 */
+/* left align */
 .leaderboard {
     list-style: none;
     padding-left: 0;
 }
-/* 任务地图 - 靠右 */
+/* achieve right part*/
 .pixel-map {
     flex: 1;
-    /* 让地图自动扩展 */
+    /* automatic expand */
     background: #444;
     padding: 15px;
     border-radius: 8px;
 }
 
-/* 适配移动端：竖排布局 */
+/* suit mobile */
 @media screen and (max-width: 768px) {
     .main-content {
         flex-direction: column;
-        /* 任务面板和地图在小屏幕上垂直排列 */
+        /* horizontaly load */
     }
 
     .task-board,
     .pixel-map {
         width: 100%;
-        /* 在小屏幕上都占满 */
+        /* full page */
         max-width: none;
     }
 }
 
-/* 模态框 (Modal) */
+/* (Modal) */
 .modal {
     display: none;
-    /* 默认隐藏 */
+    /* default hide */
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -110,13 +110,12 @@ body {
     width: 100%;
     height: 100%;
     background-color:  rgba(125, 80, 127, 0.566);
-    /* 半透明黑色背景 */
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* 弹出框内容 */
+/* popup */
 .modal-content {
     background-color: #222;
     padding: 20px;
@@ -126,7 +125,7 @@ body {
     box-shadow: 0px 0px 10px #8bc34a;
 }
 
-/* 关闭按钮 */
+/* close */
 .close {
     float: right;
     font-size: 24px;
@@ -138,9 +137,9 @@ body {
     color: red;
 }
 
-/* 让输入项独占一行 */
+/* input single row */
 .modal label {
-    /* display: block;  强制 label 独占一行 */
+
     margin-top: 10px;
     font-weight: bold;
 }
@@ -150,7 +149,7 @@ body {
     flex-direction: column;
 }
 
-/* 输入框 */
+/* input */
 .modal input[type="text"],
 .modal input[type="datetime-local"],
 .modal select,
@@ -164,7 +163,7 @@ body {
     color: white;
 }
 
-/* 按钮 */
+/* button */
 .modal .pixel-btn,.achievements-button {
     width: 100%;
     padding: 10px;
@@ -189,22 +188,19 @@ body {
     box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.2);
     margin-bottom: 15px;
     font-size: 18px;
-    /* ✅ 增大字体 */
+    /* ✅ bigger size */
     line-height: 1.6;
-    /* ✅ 增大行距 */
+    /* ✅ bigger line height */
     border: 2px solid rgba(236, 43, 243, 0.616);
-    /* ✅ 绿色边框 */
 }
 
 .task-title {
     font-size: 22px;
-    /* ✅ 增大标题字体 */
     font-weight: bold;
     color: rgb(198, 255, 209);
     margin-bottom: 10px;
 }
 
-/* 难度标签 */
 .task-header .difficulty-Easy {
     color: #8bc34a;
     font-weight: bold;
@@ -227,7 +223,7 @@ body {
     margin-top: 10px;
 }
 
-/* Start & Due 时间 */
+/* Start & Due */
 .task-start,
 .task-due {
     font-size: 16px;
@@ -280,7 +276,7 @@ body {
     margin-top: 20px;
 }
 
-/* ✅ 任务操作按钮 */
+/* ✅ task */
 .complete-task-btn, .toggle-completed-btn,.achievements-button {
     width: 90%;
     max-width: 300px;
@@ -304,7 +300,7 @@ body {
     background: rgba(236, 43, 243, 0.616);
 }
 
-/* ✅ 完成任务效果 */
+/* ✅ complete css */
 .completed-task-list .task-card {
     opacity: 0.7;
     transform: scale(0.95);
@@ -316,28 +312,7 @@ body {
     transform: scale(1);
 }
 
-/* 🎖️ 成就系统 */
-/* ✅ 成就弹出效果 */
-/* ✅ 让 Leaderboard 右下角放置按钮 */
-/* .leaderboard-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    position: relative;
-} */
-/*
-.achievements-button {
-    align-self: flex-end;
-    margin-top: 10px;
-    padding: 8px 12px;
-    background: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-*/
-/* ✅ 让成就展示在右下角 */
+/* ✅ achie popup right down */
 .achievements-popup-container {
     position: fixed;
     bottom: 20px;
@@ -348,7 +323,7 @@ body {
     align-items: flex-end;
 }
 
-/* ✅ 成就弹出框样式 */
+/* ✅ popup css */
 .achievement-toast {
     background:  rgba(125, 80, 127, 0.566);
     color: white;
@@ -366,27 +341,27 @@ body {
     transform: translateY(0);
 }
 
-/* ✅ 成就历史列表 */
+/* ✅ achive lists */
 .achievements-list-container {
-    display: none;  /* 默认隐藏 */
+    display: none;  /* default hide */
     background: #111;
     padding: 15px;
     border-radius: 10px;
     max-height: 200px;
     overflow-y: auto;
 }
-/* 让表格无边线、合并单元格 */
+/* table no border line */
 .table {
     border-collapse: collapse;
     width: 100%;
 }
 .table th, .table td {
-    border: none;          /* 去掉单元格边线 */
-    padding: 8px;          /* 给点内边距，避免文字贴边 */
-    text-align: left;      /* 文本左对齐，可按需修改 */
+    border: none;          
+    padding: 8px;          
+    text-align: left;      
 }
 
-/* 高亮 */
+/* highlight */
 .highlight-row {
     background-color: rgb(198, 255, 209) !important;
     font-weight: bold !important;
