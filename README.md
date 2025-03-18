@@ -57,7 +57,6 @@ Ensure you have the following installed:
 - **Unlock Achievements:** Completing tasks unlocks achievements and updates the leaderboard.
 
 ## Contribution
-欢迎贡献代码！请按照以下步骤操作：
 - **1.** Fork this repository.
 - **2.** Create a new branch for your feature or bug fix.
 - **3.** Commit your changes and push them to your forked repository.
