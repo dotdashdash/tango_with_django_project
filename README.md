@@ -32,10 +32,6 @@ Ensure you have the following installed:
    git clone https://github.com/dotdashdash/tango_with_django_project.git
    cd TimeHero
 
-1. **克隆代码仓库**
-   ```sh
-   git clone https://github.com/dotdashdash/tango_with_django_project.git
-   cd TimeHero
 2. **Create and activate a virtual environment**
    ```sh
    python -m venv venv
