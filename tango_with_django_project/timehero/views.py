@@ -22,21 +22,38 @@ from django.contrib.auth import get_user_model
 
 def index(request):
     return render(request, 'index.html')
+# def register_view(request):
+#     """register"""
+#     if request.method == "POST":
+#         form = UserRegisterForm(request.POST)
+#         if form.is_valid():
+#             user = form.save()
+#             login(request, user)  # login after register
+#             messages.success(request, "Welcome！")
+#             return redirect("dashboard")
+#     else:
+#         form = UserRegisterForm()
+#     return render(request, "signup.html", {"form": form})
 def register_view(request):
-    """register"""
+    """ User Registration """
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # login after register
-            messages.success(request, "Welcome！")
+            login(request, user)  # Automatically log in the user
+            messages.success(request, "Welcome! 🎉 Registration successful.")
             return redirect("dashboard")
+        else:
+            messages.error(request, "Registration failed. Please check your inputs.")
+
     else:
         form = UserRegisterForm()
+
     return render(request, "signup.html", {"form": form})
 
+
 class PixelLoginView(LoginView):
-    # template_name = 'login.html'
+    template_name = 'index.html'
     authentication_form = UserLoginForm
     success_url = reverse_lazy('dashboard')
     

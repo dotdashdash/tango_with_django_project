@@ -16,44 +16,56 @@
 
     <header>
         <a class="home-btn" href="{% url 'index' %}">🏠 HOME</a>
-        <h1 ><span style="color:rgba(125, 80, 127, 0.566)">🎮 Join</span> <span class="timehero-title">TimeHero</span> 🎮</h1>
+        <h1><span style="color:rgba(125, 80, 127, 0.566)">🎮 Join</span> <span class="timehero-title">TimeHero</span> 🎮
+        </h1>
     </header>
-    
+
     <div class="register-box">
         <h3>📝 Register Here!</h3>
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <form method="POST">
             {% csrf_token %}
-            
+
             <label for="id_username">👤 Username:</label>
             <input type="text" id="id_username" name="username" required>
-    
+
             <label for="id_email">📧 Email:</label>
             <input type="email" id="id_email" name="email" required>
-    
+
             <label for="id_password1">🔒 Password:</label>
             <input type="password" id="id_password1" name="password1" required>
             <p class="password-hint">⚠️ Must be at least 8 characters, include letters and numbers.</p>
-    
+
             <label for="id_password2">🔄 Confirm Password:</label>
             <input type="password" id="id_password2" name="password2" required>
 
             <label for="id_security_question">❓ Security Question:</label>
-            <select id="id_security_question" name="security_question" class="form-control" style="color:rgba(125, 80, 127, 0.566)">
+            <select id="id_security_question" name="security_question" class="form-control"
+                style="color:rgba(125, 80, 127, 0.566)">
                 {% for value, label in form.security_question.field.choices %}
-                    <option value="{{ value }}">{{ label }}</option>
+                <option value="{{ value }}">{{ label }}</option>
                 {% endfor %}
             </select>
-        
+
             <label for="id_security_answer">✏️ Your Answer:</label>
             <input type="text" id="id_security_answer" name="security_answer" class="form-control" required>
-        
-    
+
+
             <button type="submit" class="register-btn">REGISTER</button>
         </form>
-        
+
         <p class="existing-user-text">Existing user? <a href="{% url 'index' %}">log in here</a></p>
     </div>
-    
+
 
 </body>
 
